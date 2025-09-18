@@ -1,4 +1,4 @@
-#include "sim.h"
+#include "../include/sim.h"
 #include <SDL2/SDL.h>
 #include <assert.h>
 #include <stdlib.h>
@@ -8,7 +8,7 @@
 
 static SDL_Renderer *Renderer = NULL;
 static SDL_Window *Window = NULL;
-static Uint32 Ticks = 0; // Время последнего кадра
+static Uint32 Ticks = 0; // Time of the last frame
 
 void simInit() {
   SDL_Init(SDL_INIT_VIDEO);

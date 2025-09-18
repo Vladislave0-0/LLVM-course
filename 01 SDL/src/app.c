@@ -1,4 +1,4 @@
-#include "sim.h"
+#include "../include/sim.h"
 
 // The size of the playing field in cells.
 #define GRID_WIDTH 16
