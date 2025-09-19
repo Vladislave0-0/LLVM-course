@@ -33,6 +33,3 @@ llvm-link start.ll sim.ll app.ll -o combined.bc
 # Интерпретация с загрузкой SDL2
 lli --load=$(find /usr -name "libSDL2.so" 2>/dev/null | head -n1) combined.bc
 ```
-
-## Пример запуска
-<video controls src="gif/Example.mp4" title="Title"></video>
