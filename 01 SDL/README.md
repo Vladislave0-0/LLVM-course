@@ -1,5 +1,7 @@
 ## Описание
 Это пример реализации игры "Жизнь" Джона Конвея как простого графического приложения, основанного на `SDL 2.0`.
+
+С правилами игры "Жизнь" можно ознакомиться [тут](https://ru.wikipedia.org/wiki/%D0%98%D0%B3%D1%80%D0%B0_%C2%AB%D0%96%D0%B8%D0%B7%D0%BD%D1%8C%C2%BB).
 <br><br>
 
 ## Требования к зависимостям
@@ -31,3 +33,6 @@ llvm-link start.ll sim.ll app.ll -o combined.bc
 # Интерпретация с загрузкой SDL2
 lli --load=$(find /usr -name "libSDL2.so" 2>/dev/null | head -n1) combined.bc
 ```
+
+## Пример запуска
+<video controls src="gif/Example.mp4" title="Title"></video>
