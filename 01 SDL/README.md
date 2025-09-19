@@ -33,3 +33,20 @@ llvm-link start.ll sim.ll app.ll -o combined.bc
 # Интерпретация с загрузкой SDL2
 lli --load=$(find /usr -name "libSDL2.so" 2>/dev/null | head -n1) combined.bc
 ```
+
+## Дополнительная задача
+Получить LLVM IR с инструкциями:
+```
+trunc
+getelementptr
+srem
+lshr
+zext
+bitcast
+sitofp
+select
+fpext
+tail call
+```
+
+Посмотреть файл с этими инструкциями можно в файлах `./special_instructions/main-O0.ll` и `./special_instructions/main-O1.ll`, которые были получены из файла `./special_instructions/main.c`.
