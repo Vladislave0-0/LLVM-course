@@ -57,11 +57,15 @@ def plot_patterns(patterns_by_len: dict[int, list[tuple[str, int]]], output_dir:
         ax.set_xticks(x_positions)
         ax.set_xticklabels(labels, rotation=0, fontsize=9, ha='center')
 
-        for i, (bar, count) in enumerate(zip(bars, counts)):
-            offset = 0.0 if n <= 5 else (i % 2) * 0.2 - 0.1
-            ax.text(bar.get_x() + bar.get_width() / 2 + offset,
+        # Все числа строго по центру колонок
+        for bar, count in zip(bars, counts):
+            ax.text(bar.get_x() + bar.get_width() / 2,  # Строго центр колонки
                     bar.get_height() + max(counts) * 0.01,
-                    str(count), ha='center', va='bottom', fontsize=9)
+                    str(count), 
+                    ha='center',  # Горизонтальное выравнивание по центру
+                    va='bottom',  # Вертикальное выравнивание снизу
+                    fontsize=9,
+                    weight='bold')
 
         plt.tight_layout(pad=3.0)
         plt.savefig(f"{output_dir}/patterns_len_{length}.png", dpi=150)
