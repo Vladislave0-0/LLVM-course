@@ -1,0 +1,4 @@
+./libPass.so
+./app.after_pass.ll
+./app.ll
+./trace.log
