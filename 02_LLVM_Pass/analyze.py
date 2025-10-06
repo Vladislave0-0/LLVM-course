@@ -12,20 +12,22 @@ def read_trace(file_path: str = "trace.log") -> list[str]:
     with open(file_path, 'r', encoding='utf-8') as f:
         return [line.strip() for line in f if line.strip()]
 
-def extract_instruction_sequence(lines: list[str]) -> list[str]:
-    seq = []
+def get_log_events(lines: list[str]) -> list[str]:
+    """Возвращает все строки вида 'op <- op' как события."""
+    events = []
     for line in lines:
         if " <- " in line:
-            user_opcode = line.split(" <- ", 1)[0]
-            seq.append(user_opcode)
-    return seq
+            parts = line.split(" <- ", 1)
+            if len(parts) == 2 and parts[0] and parts[1]:
+                events.append(line)
+    return events
 
-def find_frequent_patterns(sequence: list[str], max_len: int = 5, top_k: int = 10) -> dict[int, list[tuple[str, int]]]:
+def find_frequent_patterns(events: list[str], max_len: int = 5, top_k: int = 10) -> dict[int, list[tuple[str, int]]]:
     results = {}
     for length in range(1, max_len + 1):
         pattern_counts = Counter()
-        for i in range(len(sequence) - length + 1):
-            pattern = "\n".join(sequence[i:i + length])
+        for i in range(len(events) - length + 1):
+            pattern = "\n".join(events[i:i + length])
             pattern_counts[pattern] += 1
         results[length] = pattern_counts.most_common(top_k)
     return results
@@ -43,7 +45,7 @@ def plot_patterns(patterns_by_len: dict[int, list[tuple[str, int]]], output_dir:
         n = len(counts)
         colors = violet_to_green(np.linspace(0, 1, n))
 
-        fig_width = max(10, n * 1.2)
+        fig_width = max(10, n * 1.8)
         fig, ax = plt.subplots(figsize=(fig_width, 6))
 
         bar_width = 0.6
@@ -56,7 +58,7 @@ def plot_patterns(patterns_by_len: dict[int, list[tuple[str, int]]], output_dir:
         ax.set_xticklabels(labels, rotation=0, fontsize=9, ha='center')
 
         for i, (bar, count) in enumerate(zip(bars, counts)):
-            offset = 0.0 if n <= 5 else (i % 2) * 0.15 - 0.075
+            offset = 0.0 if n <= 5 else (i % 2) * 0.2 - 0.1
             ax.text(bar.get_x() + bar.get_width() / 2 + offset,
                     bar.get_height() + max(counts) * 0.01,
                     str(count), ha='center', va='bottom', fontsize=9)
@@ -67,8 +69,9 @@ def plot_patterns(patterns_by_len: dict[int, list[tuple[str, int]]], output_dir:
 
 def main():
     lines = read_trace()
-    sequence = extract_instruction_sequence(lines)
-    patterns = find_frequent_patterns(sequence, max_len=5, top_k=10)
+    events = get_log_events(lines)
+    print(f"Загружено {len(events)} событий зависимости.")
+    patterns = find_frequent_patterns(events, max_len=5, top_k=10)
     plot_patterns(patterns)
     print("Графики сохранены в './statistics/'")
 

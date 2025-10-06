@@ -59,6 +59,8 @@ python3 analyze.py
 ```
 
 Итак, было получено:
+<br>
+
 ![alt text](statistics/patterns_len_1.png)
 ![alt text](statistics/patterns_len_2.png)
 ![alt text](statistics/patterns_len_3.png)
