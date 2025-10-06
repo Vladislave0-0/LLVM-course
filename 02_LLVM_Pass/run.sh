@@ -9,13 +9,13 @@ if [ $# -eq 0 ]; then
     exit 1
 fi
 
-# Обработка аргументов: ищем time=...
+# set -x
+
 TIMEOUT=""
 CLANG_ARGS=()
 for arg in "$@"; do
     if [[ $arg == time=* ]]; then
         TIMEOUT="${arg#time=}"
-        # Проверяем, что значение — целое положительное число
         if ! [[ "$TIMEOUT" =~ ^[0-9]+$ ]] || [ "$TIMEOUT" -eq 0 ]; then
             echo "Error: time must be a positive integer (seconds)" >&2
             exit 1
@@ -25,7 +25,6 @@ for arg in "$@"; do
     fi
 done
 
-# После обработки CLANG_ARGS[0] — это исходный файл
 SRC_FILE="${CLANG_ARGS[0]}"
 
 if [ -z "$SRC_FILE" ] || [ ! -f "$SRC_FILE" ]; then
@@ -36,15 +35,13 @@ fi
 NAME=$(basename -- "$SRC_FILE")
 NAME="${NAME%.*}"
 
-# Сборка
 clang++ pass_trace.cpp -fPIC -shared -I$(llvm-config --includedir) -o libPass.so || exit 1
 clang -O2 "$SRC_FILE" -emit-llvm -S -o "$NAME.ll" || exit 1
 clang -O2 -fpass-plugin=./libPass.so "$SRC_FILE" -emit-llvm -S -o "$NAME.after_pass.ll" || exit 1
 clang -O2 log.c "$NAME.after_pass.ll" "${CLANG_ARGS[@]:1}" -o get_log.out || exit 1
 
-# Запуск с таймаутом (если задан)
 if [ -n "$TIMEOUT" ]; then
     timeout "$TIMEOUT"s ./get_log.out > trace.log
 else
-    ./get_log.out > trace.log
+    # ./get_log.out > trace.log
 fi
