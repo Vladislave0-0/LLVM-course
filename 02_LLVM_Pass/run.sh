@@ -42,6 +42,6 @@ clang -O2 log.c "$NAME.after_pass.ll" "${CLANG_ARGS[@]:1}" -o get_log.out || exi
 
 if [ -n "$TIMEOUT" ]; then
     timeout "$TIMEOUT"s ./get_log.out > trace.log
-else
+# else
     # ./get_log.out > trace.log
 fi
