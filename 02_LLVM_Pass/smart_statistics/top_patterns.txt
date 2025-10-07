@@ -1,0 +1,269 @@
+==================================================
+ТОП-10 ПАТТЕРНОВ (ЦИКЛИЧЕСКИЕ СДВИГИ ОБЪЕДИНЕНЫ)
+==================================================
+
+ТОП-10 ПАТТЕРНОВ ДЛИНЫ 1:
+----------------------------------------
+ 1. Частота: 2602845
+     call <- add
+
+ 2. Частота: 1596032
+     add <- add
+
+ 3. Частота: 1502512
+     icmp <- add
+
+ 4. Частота: 1502512
+     br <- icmp
+
+ 5. Частота: 286684
+     call <- shl
+
+ 6. Частота: 197125
+     getelementptr <- alloca
+
+ 7. Частота: 179200
+     load <- getelementptr
+
+ 8. Частота: 174720
+     getelementptr <- add
+
+ 9. Частота: 157920
+     getelementptr <- and
+
+10. Частота: 143360
+     add <- load
+
+
+ТОП-10 ПАТТЕРНОВ ДЛИНЫ 2:
+----------------------------------------
+ 1. Частота: 1484592
+     icmp <- add
+     br <- icmp
+
+ 2. Частота: 1466672
+     add <- add
+     icmp <- add
+
+ 3. Частота: 1293040
+     call <- add
+     add <- add
+
+ 4. Частота: 1289015
+     br <- icmp
+     call <- add
+
+ 5. Частота: 1146880
+     call <- add
+     call <- add
+
+ 6. Частота: 143360
+     call <- shl
+     call <- add
+
+ 7. Частота: 143324
+     call <- shl
+     add <- add
+
+ 8. Частота: 142240
+     br <- icmp
+     call <- shl
+
+ 9. Частота: 108640
+     load <- getelementptr
+     getelementptr <- alloca
+
+10. Частота: 107520
+     getelementptr <- alloca
+     getelementptr <- and
+
+
+ТОП-10 ПАТТЕРНОВ ДЛИНЫ 3:
+----------------------------------------
+ 1. Частота: 1466672
+     add <- add
+     icmp <- add
+     br <- icmp
+
+ 2. Частота: 1293040
+     call <- add
+     add <- add
+     icmp <- add
+
+ 3. Частота: 1289015
+     icmp <- add
+     br <- icmp
+     call <- add
+
+ 4. Частота: 1146880
+     call <- add
+     call <- add
+     add <- add
+
+ 5. Частота: 1146810
+     br <- icmp
+     call <- add
+     call <- add
+
+ 6. Частота: 143360
+     call <- shl
+     call <- add
+     add <- add
+
+ 7. Частота: 143324
+     call <- add
+     call <- shl
+     add <- add
+
+ 8. Частота: 143324
+     call <- shl
+     add <- add
+     icmp <- add
+
+ 9. Частота: 142240
+     icmp <- add
+     br <- icmp
+     call <- shl
+
+10. Частота: 142240
+     br <- icmp
+     call <- shl
+     call <- add
+
+
+ТОП-10 ПАТТЕРНОВ ДЛИНЫ 4:
+----------------------------------------
+ 1. Частота: 1293040
+     call <- add
+     add <- add
+     icmp <- add
+     br <- icmp
+
+ 2. Частота: 1146880
+     call <- add
+     call <- add
+     add <- add
+     icmp <- add
+
+ 3. Частота: 1146810
+     icmp <- add
+     br <- icmp
+     call <- add
+     call <- add
+
+ 4. Частота: 1146810
+     br <- icmp
+     call <- add
+     call <- add
+     add <- add
+
+ 5. Частота: 143360
+     call <- shl
+     call <- add
+     add <- add
+     icmp <- add
+
+ 6. Частота: 143324
+     call <- add
+     call <- shl
+     add <- add
+     icmp <- add
+
+ 7. Частота: 143324
+     call <- shl
+     add <- add
+     icmp <- add
+     br <- icmp
+
+ 8. Частота: 142240
+     icmp <- add
+     br <- icmp
+     call <- shl
+     call <- add
+
+ 9. Частота: 142240
+     br <- icmp
+     call <- shl
+     call <- add
+     add <- add
+
+10. Частота: 142204
+     icmp <- add
+     br <- icmp
+     call <- add
+     call <- shl
+
+
+ТОП-10 ПАТТЕРНОВ ДЛИНЫ 5:
+----------------------------------------
+ 1. Частота: 1146880
+     call <- add
+     call <- add
+     add <- add
+     icmp <- add
+     br <- icmp
+
+ 2. Частота: 143360
+     call <- shl
+     call <- add
+     add <- add
+     icmp <- add
+     br <- icmp
+
+ 3. Частота: 143324
+     call <- add
+     call <- shl
+     add <- add
+     icmp <- add
+     br <- icmp
+
+ 4. Частота:  89600
+     add <- load
+     add <- add
+     add <- load
+     add <- add
+     add <- load
+
+ 5. Частота:  71680
+     add <- add
+     add <- load
+     add <- add
+     add <- load
+     add <- add
+
+ 6. Частота:  34720
+     getelementptr <- alloca
+     getelementptr <- add
+     getelementptr <- add
+     load <- getelementptr
+     icmp <- load
+
+ 7. Частота:  33600
+     getelementptr <- alloca
+     getelementptr <- and
+     getelementptr <- ashr
+     load <- getelementptr
+     getelementptr <- alloca
+
+ 8. Частота:  33600
+     load <- getelementptr
+     getelementptr <- alloca
+     getelementptr <- and
+     getelementptr <- add
+     load <- getelementptr
+
+ 9. Частота:  17920
+     getelementptr <- and
+     load <- getelementptr
+     add <- load
+     add <- load
+     add <- add
+
+10. Частота:  17920
+     load <- getelementptr
+     add <- load
+     add <- load
+     add <- add
+     add <- load
+
+
