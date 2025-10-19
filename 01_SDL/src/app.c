@@ -1,8 +1,8 @@
 #include "../include/sim.h"
 
 // The size of the playing field in cells.
-#define GRID_WIDTH 16
-#define GRID_HEIGHT 16
+#define GRID_WIDTH 32
+#define GRID_HEIGHT 32
 
 // The size of one cell in pixels (512 / 32 = 16).
 #define CELL_SIZE ((SIM_X_SIZE) / (GRID_WIDTH))
@@ -16,7 +16,7 @@
 //    RANDOM_INIT == 0 --- The points on the field are set according to the
 //                        pattern in the initStartingPosition() function.
 //    RANDOM_INIT == 1 --- The points on the field are set randomly.
-#define RANDOM_INIT 0
+#define RANDOM_INIT 1
 
 // Maximum number of frames.
 #define MAX_STEPS 10000
