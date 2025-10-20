@@ -3,9 +3,11 @@
 using namespace LLVM_IRGen;
 
 int main() {
-  LLVM_IRGen::Generator generator{"app.c"};
-  
+  LLVM_IRGen::Generator generator;
+
   generator.generation();
   generator.dump();
-  generator.interpretation();
+  
+  if (generator.verifyModule_())
+    generator.interpretation();
 }

@@ -1,15 +1,8 @@
 #pragma once
 
-#include "llvm/ExecutionEngine/ExecutionEngine.h"
-#include "llvm/ExecutionEngine/GenericValue.h"
-#include "llvm/IR/IRBuilder.h"
-#include "llvm/IR/LLVMContext.h"
-#include "llvm/IR/Module.h"
-#include "llvm/IR/Verifier.h"
-#include "llvm/Support/TargetSelect.h"
-#include "llvm/Support/raw_ostream.h"
-#include <memory>
-#include <string_view>
+#include <llvm/IR/IRBuilder.h>
+#include <llvm/IR/LLVMContext.h>
+#include <llvm/IR/Module.h>
 
 using namespace llvm;
 
@@ -20,22 +13,22 @@ class Generator final {
   IRBuilder<> builder;
 
   const std::string_view appName = "app";
-  const std::string_view simRandName = "simRand";
-  const std::string_view simFlushName = "simFlush";
   const std::string_view simPutPixelName = "simPutPixel";
+  const std::string_view simFlushName = "simFlush";
+  const std::string_view simRandName = "simRand";
 
+  Function *printSimPutPixel();
   Function *printSimFlush();
   Function *printSimRand();
-  Function *printSimPutPixel();
 
 public:
-  Generator(const std::string moduleID)
+  Generator(const std::string moduleID = "app.c")
       : context(), IRModule(std::make_unique<Module>(moduleID, context)),
         builder(context) {}
 
   void generation();
+  void dump(const std::string &filename = "app.ll");
+  bool verifyModule_();
   void interpretation();
-  void dump();
 };
-
 } // namespace LLVM_IRGen
