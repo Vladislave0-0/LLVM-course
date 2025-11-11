@@ -19,13 +19,13 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  // std::cout << "Successfully parsed " << parser.getInstructions().size()
-  //           << " instructions." << std::endl;
+  std::cout << "Successfully parsed " << parser.getInstructions().size()
+            << " instructions." << std::endl;
 
-  // asm2ir::IRGenerator generator;
-  // generator.generate(parser.getInstructions(), parser.getLabels());
+  asm2ir::IRGenerator generator;
+  generator.generate(parser.getInstructions(), parser.getLabels());
 
-  // generator.writeToFile(outputFile);
+  generator.writeToFile(outputFile);
 
-  // std::cout << "LLVM IR generated successfully: " << outputFile << std::endl;
+  std::cout << "LLVM IR generated successfully: " << outputFile << std::endl;
 }
