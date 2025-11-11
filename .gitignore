@@ -9,3 +9,5 @@ Literature
 02_LLVM_Pass/app.after_pass.ll
 02_LLVM_Pass/app.ll
 02_LLVM_Pass/trace.log
+
+compile_commands.json
