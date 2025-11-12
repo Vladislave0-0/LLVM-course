@@ -10,4 +10,6 @@ Literature
 02_LLVM_Pass/app.ll
 02_LLVM_Pass/trace.log
 
+04_ASM2IR_old
+
 compile_commands.json
