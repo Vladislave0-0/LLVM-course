@@ -1,17 +1,27 @@
 #include "../include/AsmParser.hpp"
-#include "../include/IRGenerator.hpp"
+// #include "../include/IRGenerator.hpp"
+
+#include <CLI/CLI.hpp>
 #include <iostream>
 #include <string>
 
 int main(int argc, char **argv) {
-  if (argc < 2) {
-    std::cerr << "Usage: " << argv[0] << " <asm_file> [output_file.ll]"
-              << std::endl;
-    return 1;
-  }
+  CLI::App app{"ASM to LLVM IR generator"};
 
-  std::string asmFile = argv[1];
-  std::string outputFile = (argc > 2) ? argv[2] : "output.ll";
+  std::string asmFile;
+  std::string outputFile = "output.ll";
+  bool emulateMode = false;
+
+  app.add_option("asm_file", asmFile, "Input ASM file")->required();
+  app.add_option("-o,--output", outputFile, "Output LLVM IR file");
+  app.add_flag("-e,--emulate", emulateMode,
+               "Generate IR with emulation function calls");
+
+  try {
+    app.parse(argc, argv);
+  } catch (const CLI::ParseError &e) {
+    return app.exit(e);
+  }
 
   asm2ir::AsmParser parser{asmFile};
   if (!parser.parse()) {
@@ -21,11 +31,4 @@ int main(int argc, char **argv) {
 
   std::cout << "Successfully parsed " << parser.getInstructions().size()
             << " instructions." << std::endl;
-
-  asm2ir::IRGenerator generator;
-  generator.generate(parser.getInstructions(), parser.getLabels());
-
-  generator.writeToFile(outputFile);
-
-  std::cout << "LLVM IR generated successfully: " << outputFile << std::endl;
 }

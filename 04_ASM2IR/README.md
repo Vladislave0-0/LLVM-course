@@ -1,78 +1,41 @@
-# Assembler to LLVM IR generator
+## Simple Simulator implementation:
+The ISA description is placed in the `include/ISA.h`.
 
-## Описание
-1) Написать свой набор инструкций из статистики для ASM и LLVM IR вашего графического приложения. 
-2) Переписать приложение на ASM. 
-3) Написать `ASM2IR` генератор:
-    - С вызовами эмулирующих функций (кроме инструкций потока управления).
-    - С генерацией IR-эквивалентов для всех инструкций.
+Application needs 2 argument: file with assembler or binary code and execution mod (1-3):
+1. Simulation
+2. IR with emulate funcs
+3. Full IR generation
+```
+clang++ $(llvm-config --cppflags --ldflags --libs) *.cpp ../SDL/sim.c -I ../SDL -lSDL2
+./a.out examples/app.sim 1-3
+./a.out examples/graphic.sim 1-3
+./a.out examples/graphic.o 1-3
+./a.out examples/clang.o 1-3
+./a.out examples/lang.o 1-3
+./a.out examples/nodelang.o 1-3
+./a.out examples/app2.o 1-3
+```
+## Link with SDL Example
+```
+./a.out examples/app.sim 3 -> Copy to app.ll
+clang app.ll ../SDL/sim.c ../SDL/start.c -I ../SDL -lSDL2
+./a.out
+```
 
-## Ход работы:
-
-1) Для начала составим примерный набор ассемблерных команд на основе LLVM IR и второго задания `02_LLVM_PASS`, в котором была собрана статистика часто повторяющихся паттернов инструкций:
-
-| **№** |   **Инструкция**  |             **Формат ASM**            |                           **Назначение**                          |                                     **LLVM IR-эквивалент**                                    |
-|:-----:|:-----------------:|:-------------------------------------:|:-----------------------------------------------------------------:|:---------------------------------------------------------------------------------------------:|
-|   1   |        ADD        |          ADD dst, src1, src2          |                        Сложение целых чисел                       |                                  %dst = add i32 %src1, %src2                                  |
-|   2   |        ADDI       |           ADDi dst, src, imm          |                       Сложение с константой                       |                                    %dst = add i32 %src, imm                                   |
-|   3   |        SUB        |          SUB dst, src1, src2          |                       Вычитание целых чисел                       |                                  %dst = sub i32 %src1, %src2                                  |
-|   4   |        ANDi       |           ANDi dst, src, imm          |                     Побитовое "И" с константой                    |                                    %dst = and i32 %src, imm                                   |
-|   5   |       SREMi       |          SREMi dst, src, imm          |                  Остаток от деления на константу                  |                                   %dst = srem i32 %src, imm                                   |
-|   6   |        SHL        |           SHL dst, src, imm           |                            Сдвиг влево                            |                                    %dst = shl i32 %src, imm                                   |
-|   7   |       TRUNC       |             TRUNC dst, src            |      Усечение значения из более  широкого типа в более узкий      |                                  %dst = trunc i64 %src to i32                                 |
-|   8   |        ZEXT       |             ZEXT dst, src             | Нулевое расширение значения из  более узкого типа в более широкий |                                  %dst = zext i32 %src to i64                                  |
-|   9   |       CMP_EQ      |          CMP_EQ dst, src, imm         |                       Сравнение на равенство                      |                                  %dst = icmp eq i32 %src, imm                                 |
-|   10  |       CMP_NE      |          CMP_NE dst, src, imm         |                      Сравнение на неравенство                     |                                  %dst = icmp ne i32 %src, imm                                 |
-|   11  |       CMP_LT      |          CMP_LT dst, src, imm         |                         Сравнение "меньше"                        |                                 %dst = icmp slt i32 %src, imm                                 |
-|   12  |       CMP_GT      |          CMP_GT dst, src, imm         |                         Сравнение "больше"                        |                                 %dst = icmp sgt i32 %src, imm                                 |
-|   13  |       INC_EQ      |          INC_EQ dst, src, imm         |                 Инкремент + сравнение на равенство                |                     %temp = add i32 %src, 1 %dst = icmp eq i32 %temp, imm                     |
-|   14  |  COUNT_NEIGHBOURS |    COUNT_NEIGHBOURS grid, x, y, dst   |                    Подсчет живых соседей клетки                   |                                          Многа букав                                          |
-|   15  |       BRANCH      |              BRANCH label             |                        Безусловный переход                        |                                        br label %label                                        |
-|   16  |      BR_COND      | BR_COND cond, label_true, label_false |                          Условный переход                         |                             br i1 %cond, label %true, label %false                            |
-|   17  |        MOVi       |             MOVi dst, imm             |                         Загрузка константы                        |                                         %dst = i32 imm                                        |
-|   18  |        MOV        |              MOV dst, src             |                        Копирование регистра                       |                                          %dst = %src                                          |
-|   19  |    ALLOCA_GRID    |            ALLOCA_GRID dst            |                  Выделение памяти под сетку 32x32                 |                                %dst = alloca [32 x [32 x i32]]                                |
-|   20  | ALLOCA_NEIGHBOURS |         ALLOCA_NEIGHBOURS dst         |                    Выделение памяти под соседей                   |                                 %dst = alloca [8 x [2 x i32]]                                 |
-|   21  |       MEMSET      |               MEMSET ptr              |                          Обнуление памяти                         |                    call void @llvm.memset.p0.i64(ptr %ptr, i8 0, i64 size)                    |
-|   22  |       MEMCPY      |            MEMCPY dst, src            |                         Копирование памяти                        |                 call void @llvm.memcpy.p0.p0.i64(ptr %dst, ptr %src, i64 size)                |
-|   23  |      GET_CELL     |        GET_CELL grid, x, y, dst       |                     Получение значения клетки                     | %idx = getelementptr inbounds [32 x i32], ptr %grid, i64 %x, i64 %y %dst = load i32, ptr %idx |
-|   24  |      SET_CELL     |        SET_CELL grid, x, y, src       |                     Установка значения клетки                     |  %idx = getelementptr inbounds [32 x i32], ptr %grid, i64 %x, i64 %y store i32 %src, ptr %idx |
-|   25  |  SCREEN_PUT_PIXEL |      SCREEN_PUT_PIXEL x, y, color     |                         Нарисовать пиксель                        |                       call void @simPutPixel(i32 %x, i32 %y, i32 %color)                      |
-|   26  |    SCREEN_FLUSH   |              SCREEN_FLUSH             |                           Обновить экран                          |                                     call void @simFlush()                                     |
-|   27  |     DRAW_GRID     |             DRAW_GRID grid            |                        Отрисовка всей сетки                       |                                          Многа букав                                          |
-|   28  |      SIM_RAND     |              SIM_RAND dst             |                     Генерация случайного числа                    |                                   %dst = call i32 @simRand()                                  |
-|   29  |   LIFETIME_START  |           LIFETIME_START ptr          |                      Начало жизненного цикла                      |                     call void @llvm.lifetime.start.p0(i64 size, ptr %ptr)                     |
-|   30  |    LIFETIME_END   |            LIFETIME_END ptr           |                       Конец жизненного цикла                      |                      call void @llvm.lifetime.end.p0(i64 size, ptr %ptr)                      |
-|   31  |        EXIT       |                  EXIT                 |                        Завершение программы                       |                                            ret void                                           |
-<!-- 
-|  № | Инструкция |             Формат ASM            |              Назначение              |                LLVM IR-эквивалент               |
-|:--:|:----------:|:---------------------------------:|:------------------------------------:|:-----------------------------------------------:|
-|  1 |     ADD    |        ADD dst, src1, src2        |         Сложение целых чисел         |           %dst = add i32 %src1, %src2           |
-|  2 |     SUB    |        SUB dst, src1, src2        |         Вычитание целых чисел        |           %dst = sub i32 %src1, %src2           |
-|  3 |     SHL    |         SHL dst, src, imm         |              Сдвиг влево             |             %dst = shl i32 %src, imm            |
-|  4 |     AND    |        AND dst, src1, src2        |             Побитовое "И"            |           %dst = and i32 %src1, %src2           |
-|  5 |     OR     |         OR dst, src1, src2        |            Побитовое "ИЛИ"           |            %dst = or i32 %src1, %src2           |
-|  6 |     CMP    |      CMP dst, src1, src2, op      |  Сравнение (eq, ne, lt, gt, le, ge)  |         %dst = icmp op i32 %src1, %src2         |
-|  7 |     BR     |              BR label             |          Безусловный переход         |                   br label %L                   |
-|  8 |     BRZ    | BRZ cond, label_true, label_false |           Условный переход           |      br i1 %cond, label %then, label %else      |
-|  9 |     MOV    |            MOV dst, imm           |          Загрузка константы          |                  %dst = i32 imm                 |
-| 10 |    ALLOC   |          ALLOC dst, size          |        Выделение блока памяти        |            %dst = alloca [size x i32]           |
-| 11 |     LEA    |       LEA dst, base, offset       |           Вычисление адреса          | %dst = getelementptr inbounds %base, i64 offset |
-| 12 |     LD     |           LD dst, [addr]          |          Загрузка из памяти          |            %dst = load i32, ptr %addr           |
-| 13 |     ST     |           ST [addr], src          |          Сохранение в память         |            store i32 %src, ptr %addr            |
-| 14 |    CALL    |           CALL fn, args…          |             Вызов функции            |                call void @fn(...)               |
-| 15 |     RET    |                RET                |          Завершение функции          |                     ret void                    |
-| 16 |   PUTPIX   |         PUTPIX x, y, color        |          Нарисовать пиксель          | call void @simPutPixel(i32 x, i32 y, i32 color) |
-| 17 |    FLUSH   |               FLUSH               |            Обновить экран            |              call void @simFlush()              |
-| 18 |    RAND    |              RAND dst             |       Получить случайное число       |            %dst = call i32 @simRand()           |
-| 19 |     PHI    |    PHI dst, srcA, srcB, labels    | Объединение значений из разных веток |     `%dst = phi i32 [ %a, %L1 ], [ %b, %L2 ]     | -->
-
-
-
-<!-- 2) На данном этапе постараюсь написать парсер ассемблера для команд из пункта 1. 
-
-3) Перепишу LLVM IR в ASM файл, параллельно дописывая набор команд и сам ассемблер. 
-
-4) 
-
-5)  -->
+## Endless compilation:
+Choose IR Generation:
+```
+./a.out examples/app.sim 3 tmp1_.ll
+./a.out examples/clang.o 3 tmp1_.ll
+./a.out examples/lang.o 3 tmp1_.ll
+./a.out examples/nodelang.o 3 tmp1_.ll
+./a.out examples/app2.o 3 tmp1_.ll
+```
+Compilation loop.sh:
+```
+IR    -> OptIR : opt tmp(i)_.ll -O2 -o tmp(i).ll -S
+OptIR -> Bin   : llc tmp(i).ll -march sim -filetype=obj
+Bin   -> IR    : ./a.out tmp(i).o 3 tmp(i+1)_.ll
+```
+## ELFIO repository:
+https://github.com/serge1/ELFIO

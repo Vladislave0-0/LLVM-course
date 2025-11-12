@@ -1,120 +1,116 @@
 #include "../include/AsmParser.hpp"
-#include <cctype>
+#include "../include/Instructions.hpp"
+
 #include <fstream>
-#include <sstream>
+#include <iostream>
 
 namespace asm2ir {
-
 bool AsmParser::parse() {
-  std::ifstream file(filename);
-  if (!file.is_open())
+  std::ifstream file{filename};
+
+  if (!file.is_open()) {
+    std::cout << std::string("Can't open " + filename) << std::endl;
+    return false;
+  }
+
+  instrs_info.prepareInfo();
+
+  if (!searchBBs(file))
     return false;
 
-  std::string line;
-  size_t line_number = 0;
+  // Возврат каретки.
+  file.clear();
+  file.seekg(0, std::ios::beg);
 
-  while (std::getline(file, line)) {
-    ++line_number;
-    processLine(line, line_number);
+  if (!readInstructions(file))
+    return false;
+
+  return true;
+}
+
+bool AsmParser::searchBBs(std::ifstream &input) {
+  std::string name;
+  std::string arg;
+
+  uint64_t pc = 0;
+  uint64_t opcode = 0;
+
+  while (input >> name) {
+    opcode = instrs_info.getOpCode(name);
+
+    std::cout << "Name: " << name << '\n';
+    std::cout << "Opcode: " << opcode << '\n';
+
+    switch (opcode) {
+    default:
+      if (bb2pc.find(name) != bb2pc.end()) {
+        std::cout << std::string("Repetition of label: " + name);
+        return false;
+      }
+
+      if (pc2bb.find(pc) != pc2bb.end()) {
+        std::cout << std::string("2 labels can't be on the one PC: " + name +
+                                 " and " + pc2bb[pc]);
+        return false;
+      }
+
+      bb2pc[name] = pc;
+      basic_blocks.emplace_back(name);
+      pc2bb[pc] = name;
+
+      continue;
+
+#define ISA(Opcode, Name, SkipArgs, ReadArgs, WriteArgs, Execute,              \
+            IRGenExecute)                                                      \
+  case (Opcode):                                                               \
+    SkipArgs;                                                                  \
+    break;
+#include "../include/ISA.hpp"
+#undef ISA
+    }
+
+    ++pc;
   }
 
   return true;
 }
 
-void AsmParser::processLine(const std::string &input_line, size_t line_number) {
-  // Убираем комментарии.
-  std::string line = input_line;
-  size_t comment_pos = line.find(';');
-  if (comment_pos != std::string::npos) {
-    line = line.substr(0, comment_pos);
-  }
+bool AsmParser::readInstructions(std::ifstream &input) {
+  std::string name;
+  std::string arg;
 
-  // Убираем пробелы с обеих сторон.
-  line.erase(0, line.find_first_not_of(" \t"));
-  line.erase(line.find_last_not_of(" \t") + 1);
+  uint64_t opcode = 0;
 
-  if (line.empty())
-    return;
+  while (input >> name) {
+    opcode = instrs_info.getOpCode(name);
+    Instruction I;
+    I.opcode = opcode;
 
-  // Проверка, является ли строка меткой. Сохраняем её.
-  if (line.back() == ':') {
-    std::string label = line.substr(0, line.size() - 1);
-    labels[label] = instructions.size();
-    return;
-  }
+    switch (opcode) {
+    default:
+      if (bb2pc.find(name) != bb2pc.end())
+        continue;
 
-  // Разделяем строку на токены.
-  std::vector<std::string> tokens;
-  tokenizeLine(line, tokens);
+      std::cout << std::string("Wrong Opcode for " + name);
+      return false;
 
-  // Если токенов на строке не было.
-  if (tokens.empty())
-    return;
-
-  // Сохраняем инструкцию.
-  Instruction instr;
-  instr.opcode = tokens[0];
-  instr.line_number = line_number;
-
-  // Обработать операнды
-  for (size_t i = 1; i < tokens.size(); ++i) {
-    std::string token = tokens[i];
-
-    Operand operand;
-
-    // Проверить тип операнда
-    if (token[0] == 'x' && std::isdigit(token[1])) {
-      operand.type = OperandType::REGISTER;
-      operand.value = token.substr(1);
-    } else if (token[0] == '%') {
-      operand.type = OperandType::REGISTER;
-      operand.value = token.substr(1);
-    } else if (std::isdigit(token[0]) || token[0] == '-') {
-      operand.type = OperandType::IMMEDIATE;
-      operand.value = token;
-    } else if (std::isalpha(token[0])) {
-      operand.type = OperandType::LABEL;
-      operand.value = token;
-    } else {
-      operand.type = OperandType::MEMORY;
-      operand.value = token;
+#define ISA(Opcode, Name, SkipArgs, ReadArgs, WriteArgs, Execute,              \
+            IRGenExecute)                                                      \
+  case (Opcode):                                                               \
+    ReadArgs;                                                                  \
+    break;
+#include "../include/ISA.hpp"
+#undef ISA
     }
 
-    instr.operands.push_back(operand);
+    instructions.push_back(I);
   }
 
-  instructions.push_back(instr);
-}
-
-void AsmParser::tokenizeLine(const std::string &line,
-                             std::vector<std::string> &tokens) {
-  std::istringstream iss(line);
-  std::string token;
-
-  while (iss >> token) {
-    // Разделяем операнды через запятые.
-    size_t pos = 0;
-    size_t comma_pos = token.find(',');
-
-    while (comma_pos != std::string::npos) {
-      if (comma_pos > pos)
-        tokens.push_back(token.substr(pos, comma_pos - pos));
-
-      pos = comma_pos + 1;
-      comma_pos = token.find(',', pos);
-    }
-
-    if (pos < token.size())
-      tokens.push_back(token.substr(pos));
-  }
+  return true;
 }
 
 const std::vector<Instruction> &AsmParser::getInstructions() const {
   return instructions;
-}
-
-const std::unordered_map<std::string, size_t> &AsmParser::getLabels() const {
-  return labels;
 }
 
 } // namespace asm2ir
