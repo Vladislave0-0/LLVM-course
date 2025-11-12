@@ -31,11 +31,10 @@ execute_process(
     OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 
-# Поиск SDL2
+# Поиск SDL2.
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(SDL2 REQUIRED sdl2)
 
-# Создаем исполняемый файл
 add_executable(asm2ir
     src/AsmParser.cpp
     src/CPU.cpp
@@ -52,7 +51,7 @@ target_include_directories(asm2ir PRIVATE
     ${SDL2_INCLUDE_DIRS}
 )
 
-# Флаги компиляции для LLVM и SDL.
+# Флаги компиляции для LLVM и SDL2.
 target_compile_options(asm2ir PRIVATE 
     ${LLVM_CPPFLAGS}
     ${SDL2_CFLAGS_OTHER}
