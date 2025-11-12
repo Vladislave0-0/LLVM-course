@@ -1,10 +1,9 @@
 #pragma once
 
-#include "CPU.hpp"
 #include "IRGenerator.hpp"
 
 namespace asm2ir {
-  
+
 struct EmulateIRGenerator final : public IRGenerator {
   void buildIR(const AsmParser &parser) override;
   void execute(CPU &cpu) override;

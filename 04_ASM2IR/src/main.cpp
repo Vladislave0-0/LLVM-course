@@ -1,14 +1,8 @@
-#include "../include/AsmParser.hpp"
-#include "../include/CPU.hpp"
 #include "../include/EmulateIR.hpp"
 #include "../include/FullIR.hpp"
-#include "../include/IRGenerator.hpp"
-#include <llvm/IR/Module.h>
-#include <llvm/IR/Verifier.h>
 
 #include <CLI/CLI.hpp>
-#include <iostream>
-#include <string>
+#include <llvm/IR/Verifier.h>
 
 using namespace asm2ir;
 

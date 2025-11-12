@@ -2,8 +2,6 @@
 
 #include "Instructions.hpp"
 
-#include <string>
-#include <unordered_map>
 #include <vector>
 
 namespace asm2ir {

@@ -1,7 +1,6 @@
 #pragma once
 
-#include <cinttypes>
-#include <iostream>
+#include <cstdint>
 
 extern "C" {
 int simRand();

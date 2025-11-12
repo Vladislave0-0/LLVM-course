@@ -1,6 +1,5 @@
 #pragma once
 
-#include "CPU.hpp"
 #include "IRGenerator.hpp"
 
 namespace asm2ir {
