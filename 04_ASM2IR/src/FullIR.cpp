@@ -1,164 +1,101 @@
-// #include "include/fullIR.h"
-// #include "llvm/ExecutionEngine/ExecutionEngine.h"
-// #include "llvm/ExecutionEngine/GenericValue.h"
-// #include "llvm/IR/IRBuilder.h"
-// #include "llvm/IR/Verifier.h"
-// #include "llvm/Support/TargetSelect.h"
-// #include "llvm/Support/raw_ostream.h"
-// #include <vector>
+#include "../include/FullIR.hpp"
+#include "../include/AsmParser.hpp"
+#include "CPU.hpp"
+#include <llvm-18/llvm/ExecutionEngine/ExecutionEngine.h>
+#include <llvm-18/llvm/ExecutionEngine/GenericValue.h>
+#include <llvm-18/llvm/IR/Verifier.h>
+#include <llvm-18/llvm/Transforms/Utils/Cloning.h>
 
-// using namespace llvm;
+namespace asm2ir {
 
-// void FullIR::buildIR(Binary &Bin) {
-//   module = new Module("top", context);
-//   IRBuilder<> builder(context);
-//   voidType = Type::getVoidTy(context);
-//   int32Type = Type::getInt32Ty(context);
-//   Type *boolType = Type::getInt1Ty(context);
+extern "C" {
+void simInit();
+void simExit();
+}
 
-//   // declare void @app()
-//   FunctionType *funcType = FunctionType::get(voidType, false);
-//   mainFunc =
-//       Function::Create(funcType, Function::ExternalLinkage, "app", module);
-//   // Functions types
-//   FunctionType *voidFuncType = FunctionType::get(voidType, false);
-//   ArrayRef<Type *> int32x3Types = {int32Type, int32Type, int32Type};
-//   FunctionType *int32x3FuncType =
-//       FunctionType::get(voidType, int32x3Types, false);
+void FullIRGenerator::buildIR(const AsmParser &parser) {
+  auto voidTy = Type::getVoidTy(context);
+  auto int64Ty = Type::getInt64Ty(context);
+  auto int32PtrTy = Type::getInt32Ty(context)->getPointerTo();
 
-//   // declare void @simPutPixel(i32 noundef, i32 noundef, i32 noundef)
-//   FunctionCallee simPutPixelFunc =
-//       module->getOrInsertFunction("simPutPixel", int32x3FuncType);
+  auto *SwitchTableTy = ArrayType::get(builder.getInt32Ty(), 3);
+  auto &SwitchTable = globals.emplace_back(std::make_unique<GlobalVariable>(
+      *IRModule, SwitchTableTy, true, GlobalValue::PrivateLinkage,
+      ConstantArray::get(SwitchTableTy, {builder.getInt32(-16711936),
+                                         builder.getInt32(-16776961),
+                                         builder.getInt32(-65536)}),
+      "switch.table.app"));
 
-//   // declare void @simFlush()
-//   FunctionType *simFlushType = FunctionType::get(voidType, false);
-//   FunctionCallee simFlushFunc =
-//       module->getOrInsertFunction("simFlush", simFlushType);
+  SwitchTable->setUnnamedAddr(GlobalValue::UnnamedAddr::Local);
+  SwitchTable->setAlignment(Align(4));
 
-//   // declare i32 @simRand()
-//   FunctionType *simRandType = FunctionType::get(int32Type, false);
-//   FunctionCallee simRandFunc =
-//       module->getOrInsertFunction("simRand", simRandType);
-//   // declare i32 @llvm.abs.i32(i32, i1 immarg) #4
-//   FunctionType *AbsType =
-//       FunctionType::get(int32Type, {int32Type, boolType}, false);
-//   FunctionCallee AbsFunc = module->getOrInsertFunction("llvm.abs.i32", AbsType);
+  FunctionType *FuncType = FunctionType::get(voidTy, false);
+  Function *AppFunc =
+      Function::Create(FuncType, Function::ExternalLinkage, appName, *IRModule);
 
-//   std::unordered_map<uint32_t, BasicBlock *> BBMap;
-//   for (auto &BB : Bin.BBName2PC) {
-//     BBMap[BB.second] = BasicBlock::Create(context, BB.first, mainFunc);
-//   }
+  auto *simFlush = printSimFlush();
+  auto *simPutPixel = printSimPutPixel();
+  auto *simRand = printSimRand();
 
-//   uint32_t PC = 0;
-//   builder.SetInsertPoint(BBMap[0]);
-//   // %0 = alloca i32, i32 16, align 4
-//   ArrayType *regFileType = ArrayType::get(int32Type, CPU::RegSize);
-//   Value *regFile = builder.CreateAlloca(regFileType);
+  std::unordered_map<uint32_t, BasicBlock *> BBMap;
+  for (auto &BB : parser.basic_blocks) {
+    BBMap[parser.bb2pc.at(BB)] = BasicBlock::Create(context, BB, AppFunc);
+  }
 
-//   for (Instr &I : Bin.Instrs) {
-//     switch (I.Op) {
-//     default:
-//       break;
-// #define ISA_(Opcode_, Name_, SkipArgs_, ReadArgs_, WriteArgs_, Execute_,       \
-//              IRGenExecute_)                                                    \
-//   case (Opcode_):                                                              \
-//     IRGenExecute_;                                                             \
-//     break;
-// #include "include/ISA.h"
-// #undef ISA_
-//     }
-//     PC++;
-//     auto BB = BBMap.find(PC);
-//     if (BB != BBMap.end()) {
-//       builder.CreateBr(BB->second);
-//       builder.SetInsertPoint(BB->second);
-//     }
-//   }
-// }
+  uint32_t pc = 0;
 
-// void FullIR::executeIR(CPU &Cpu) {
-//   InitializeNativeTarget();
-//   InitializeNativeTargetAsmPrinter();
+  builder.SetInsertPoint(BBMap[0]);
+  ArrayType *regFileType = ArrayType::get(int64Ty, CPU::reg_size);
+  Value *reg_file = builder.CreateAlloca(regFileType);
 
-//   ExecutionEngine *ee = EngineBuilder(std::unique_ptr<Module>(module)).create();
-//   ee->InstallLazyFunctionCreator([](const std::string &fnName) -> void * {
-//     if (fnName == "simFlush") {
-//       return reinterpret_cast<void *>(simFlush);
-//     }
-//     if (fnName == "simRand") {
-//       return reinterpret_cast<void *>(simRand);
-//     }
-//     if (fnName == "simPutPixel") {
-//       return reinterpret_cast<void *>(simPutPixel);
-//     }
-//     return nullptr;
-//   });
-//   ee->finalizeObject();
+  for (const Instruction &I : parser.instructions) {
+    switch (I.opcode) {
+    default:
+      break;
+#define ISA(Opcode_, Name_, SkipArgs_, ReadArgs_, WriteArgs_, Execute_,        \
+            IRGenExecute_)                                                     \
+  case (Opcode_):                                                              \
+    IRGenExecute_;                                                             \
+    break;
+#include "../include/ISA.hpp"
+#undef ISA
+    }
 
-//   simInit();
-//   CPU::setCPU(&Cpu);
-//   Cpu.DumpInstrs = true;
+    ++pc;
+  }
+}
 
-//   ArrayRef<GenericValue> noargs;
-//   outs() << "\n#[Running code]\n";
-//   ee->runFunction(mainFunc, noargs);
-//   outs() << "#[Code was run]\n";
+void FullIRGenerator::execute(CPU &cpu) {
+  auto execModule = CloneModule(*IRModule);
+  auto *app = execModule->getFunction(appName);
+  auto *simFlush = execModule->getFunction(simFlushName);
+  auto *simRand = execModule->getFunction(simRandName);
+  auto *simPutPixel = execModule->getFunction(simPutPixelName);
 
-//   simExit();
-// }
+  LLVMInitializeNativeTarget();
+  LLVMInitializeNativeAsmPrinter();
 
-// bool FullIR::printIR(std::string FileName, std::string &ErrorMsg) {
-//   // Prepare Graphic intrinsic usage
-//   IRBuilder<> builder(context);
-//   // declare void @llvm.sim.putpixel(i32 noundef, i32 noundef, i32 noundef)
-//   ArrayRef<Type *> simPutPixelParamTypes = {int32Type, int32Type, int32Type};
-//   FunctionType *simPutPixelType =
-//       FunctionType::get(voidType, simPutPixelParamTypes, false);
-//   FunctionCallee simPutPixelIntr =
-//       module->getOrInsertFunction("llvm.sim.putpixel", simPutPixelType);
-//   // define void @simPutPixel(i32 %0, i32 %1, i32 %2) {
-//   Function *simPutPixelFunc = module->getFunction("simPutPixel");
-//   // entry:
-//   builder.SetInsertPoint(BasicBlock::Create(context, "entry", simPutPixelFunc));
-//   // call void @llvm.sim.putpixel(i32 %0, i32 %1, i32 %2)
-//   builder.CreateCall(simPutPixelIntr,
-//                      {simPutPixelFunc->getArg(0), simPutPixelFunc->getArg(1),
-//                       simPutPixelFunc->getArg(2)});
-//   // ret
-//   builder.CreateRetVoid();
+  ExecutionEngine *ee = EngineBuilder(std::move(execModule)).create();
+  ee->InstallLazyFunctionCreator([&](const std::string &fnName) -> void * {
+    if (fnName == simFlushName) {
+      return reinterpret_cast<void *>(simFlush);
+    } else if (fnName == simRandName) {
+      return reinterpret_cast<void *>(simRand);
+    } else if (fnName == simPutPixelName) {
+      return reinterpret_cast<void *>(simPutPixel);
+    }
 
-//   // declare void @llvm.sim.flush()
-//   FunctionType *simFlushType = FunctionType::get(voidType, false);
-//   FunctionCallee simFlushIntr =
-//       module->getOrInsertFunction("llvm.sim.flush", simFlushType);
-//   // define void @simFlush() {
-//   Function *simFlushFunc = module->getFunction("simFlush");
-//   // entry:
-//   builder.SetInsertPoint(BasicBlock::Create(context, "entry", simFlushFunc));
-//   // call void @llvm.sim.flush()
-//   builder.CreateCall(simFlushIntr);
-//   // ret
-//   builder.CreateRetVoid();
+    return nullptr;
+  });
+  ee->finalizeObject();
 
-//   // declare void @llvm.sim.rand()
-//   FunctionType *simRandType = FunctionType::get(int32Type, false);
-//   FunctionCallee simRandIntr =
-//       module->getOrInsertFunction("llvm.sim.rand", simRandType);
-//   // define void @simRand() {
-//   Function *simRandFunc = module->getFunction("simRand");
-//   // entry:
-//   builder.SetInsertPoint(BasicBlock::Create(context, "entry", simRandFunc));
-//   // ret call i32 @llvm.sim.rand()
-//   builder.CreateRet(builder.CreateCall(simRandIntr));
+  simInit();
+  CPU::setCPU(&cpu);
 
-//   // Dump LLVM IR with intrinsics
-//   std::error_code EC;
-//   raw_fd_ostream OutputFile(FileName, EC);
-//   if (!EC) {
-//     module->print(OutputFile, nullptr);
-//     return false;
-//   } else {
-//     ErrorMsg = "Can't print LLVM IR to " + FileName;
-//     return true;
-//   }
-// }
+  ArrayRef<GenericValue> noargs;
+  ee->runFunction(app, noargs);
+
+  simExit();
+}
+
+} // namespace asm2ir

@@ -27,7 +27,7 @@ int main(int argc, char **argv) {
 
   AsmParser parser{asmFile};
   if (!parser.parse()) {
-    std::cerr << "Failed to parse ASM file: " << asmFile << std::endl;
+    std::cerr << "\nFailed to parse ASM file: " << asmFile << std::endl;
     return 1;
   }
 
@@ -39,7 +39,7 @@ int main(int argc, char **argv) {
   if (emulateMode) {
     generator = std::make_unique<EmulateIRGenerator>();
   } else {
-    // generator = std::make_unique<FullIRGenerator>();
+    generator = std::make_unique<FullIRGenerator>();
   }
 
   generator->buildIR(parser);
