@@ -20,8 +20,8 @@ void EmulateIRGenerator::buildIR(const AsmParser &parser) {
   ArrayType *regFileType = ArrayType::get(i64Ty, CPU::reg_size);
   IRModule->getOrInsertGlobal("reg_file", regFileType);
   reg_file = IRModule->getNamedGlobal("reg_file");
-  if (!reg_file->hasInitializer())
-    reg_file->setInitializer(ConstantAggregateZero::get(regFileType));
+  // if (!reg_file->hasInitializer())
+  //   reg_file->setInitializer(ConstantAggregateZero::get(regFileType));
 
   FunctionType *funcTy = FunctionType::get(voidTy, false);
   Function *appFunc =

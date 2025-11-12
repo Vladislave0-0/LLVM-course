@@ -1,14 +1,15 @@
-#include "../include/sim.h"
 #include <SDL2/SDL.h>
 #include <assert.h>
 #include <stdlib.h>
 #include <time.h>
 
+#include "../include/sim.h"
+
 #define FRAME_TICKS 50
 
 static SDL_Renderer *Renderer = NULL;
 static SDL_Window *Window = NULL;
-static Uint32 Ticks = 0; // Time of the last frame
+static Uint32 Ticks = 0;
 
 void simInit() {
   SDL_Init(SDL_INIT_VIDEO);
@@ -61,4 +62,4 @@ void simPutPixel(int x, int y, int argb) {
   Ticks = SDL_GetTicks();
 }
 
-int simRand() { return rand(); }
+int simRand() { return rand() % 3 % 2; }
