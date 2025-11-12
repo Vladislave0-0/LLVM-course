@@ -2,6 +2,7 @@
 #include <iostream>
 
 namespace asm2ir {
+
 CPU *CPU::cpu;
 
 void CPU::dumpCPU() const {
@@ -13,4 +14,5 @@ void CPU::dumpCPU() const {
 
   std::cout << '\n';
 }
-} // namespace ASM2IR
+
+} // namespace asm2ir

@@ -10,9 +10,10 @@ void simFlush();
 }
 
 namespace asm2ir {
+
 struct CPU final {
   static constexpr uint64_t reg_size = 64;
-  uint32_t reg_file[reg_size] = {};
+  int64_t reg_file[reg_size] = {};
   uint32_t pc;
   uint32_t next_pc;
   bool run = true;
@@ -24,11 +25,12 @@ struct CPU final {
 
 #define ISA(Opcode, Name, SkipArgs, ReadArgs, WriteArgs, Execute,              \
             IRGenExecute)                                                      \
-  static void do_##Name(long long rd, long long r1, long long r2imm,           \
-                        long long r3imm) {                                     \
+  static void do_##Name(int64_t rd, int64_t r1, int64_t r2imm,                 \
+                        int64_t r3imm) {                                       \
     Execute;                                                                   \
   }
 #include "ISA.hpp"
 #undef ISA
 };
+
 } // namespace asm2ir

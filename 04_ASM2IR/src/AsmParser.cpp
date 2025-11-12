@@ -38,9 +38,6 @@ bool AsmParser::searchBBs(std::ifstream &input) {
   while (input >> name) {
     opcode = instrs_info.getOpCode(name);
 
-    std::cout << "Name: " << name << '\n';
-    std::cout << "Opcode: " << opcode << '\n';
-
     switch (opcode) {
     default:
       if (bb2pc.find(name) != bb2pc.end()) {
@@ -108,4 +105,5 @@ bool AsmParser::readInstructions(std::ifstream &input) {
 
   return true;
 }
+
 } // namespace asm2ir

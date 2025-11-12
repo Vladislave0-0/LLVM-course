@@ -115,7 +115,7 @@
 
 //============================IRGenExecute======================================
 #define GEP2_64(arg) builder.CreateConstGEP2_64(regFileType, regFile, 0, arg)
-#define LOAD_PTR(arg) Builder.CreateLoad(int32PtrType, GEP2_64(arg))
+// #define LOAD_PTR(arg) Builder.CreateLoad(int32PtrType, GEP2_64(arg))
 #define LOAD_REG(arg) builder.CreateLoad(int64Type, GEP2_64(arg))
 #define GEN_IMM(arg) builder.getInt64(arg)
 

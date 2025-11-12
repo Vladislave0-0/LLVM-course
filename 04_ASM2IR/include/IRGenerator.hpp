@@ -8,6 +8,7 @@
 #include <llvm/IR/Module.h>
 
 namespace asm2ir {
+
 using namespace llvm;
 
 class IRGenerator {
@@ -31,6 +32,10 @@ public:
   IRGenerator()
       : context(), IRModule(std::make_unique<Module>(moduleName, context)),
         builder(context) {}
+
+  std::unique_ptr<Module> &getIRModule() {
+    return IRModule;
+  }
 
   virtual ~IRGenerator() = default;
 

@@ -15,10 +15,10 @@ struct Instruction final {
   };
 
   uint64_t opcode;
-  long long rd;
-  long long r1;
-  long long r2imm;
-  long long r3imm;
+  int64_t rd;
+  int64_t r1;
+  int64_t r2imm;
+  int64_t r3imm;
   // long long r4Imm;
 };
 
