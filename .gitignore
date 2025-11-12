@@ -4,6 +4,7 @@ build/
 *.x
 *.out
 Literature
+compile_commands.json
 
 02_LLVM_Pass/libPass.so
 02_LLVM_Pass/app.after_pass.ll
@@ -11,5 +12,4 @@ Literature
 02_LLVM_Pass/trace.log
 
 04_ASM2IR_old
-
-compile_commands.json
+04_ASM2IR/*.ll
