@@ -108,9 +108,4 @@ bool AsmParser::readInstructions(std::ifstream &input) {
 
   return true;
 }
-
-const std::vector<Instruction> &AsmParser::getInstructions() const {
-  return instructions;
-}
-
 } // namespace asm2ir

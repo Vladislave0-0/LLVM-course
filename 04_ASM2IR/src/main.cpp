@@ -1,5 +1,8 @@
 #include "../include/AsmParser.hpp"
-// #include "../include/IRGenerator.hpp"
+#include "../include/CPU.hpp"
+#include "../include/EmulateIR.hpp"
+#include "../include/FullIR.hpp"
+#include "../include/IRGenerator.hpp"
 
 #include <CLI/CLI.hpp>
 #include <iostream>
@@ -29,6 +32,16 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  std::cout << "Successfully parsed " << parser.getInstructions().size()
+  std::cout << "Successfully parsed " << parser.instructions.size()
             << " instructions." << std::endl;
+
+  std::unique_ptr<asm2ir::IRGenerator> generator;
+
+  if (emulateMode) {
+    generator = std::make_unique<asm2ir::EmulateIRGenerator>();
+  } else {
+    generator = std::make_unique<asm2ir::FullIRGenerator>();
+  }
+
+  generator->buildIR(parser);
 }

@@ -18,8 +18,8 @@ struct Instruction final {
   long long rd;
   long long r1;
   long long r2imm;
-  long long r3Imm;
-  long long r4Imm;
+  long long r3imm;
+  // long long r4Imm;
 };
 
 struct InstructionInfo final {

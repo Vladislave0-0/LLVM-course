@@ -4,7 +4,7 @@
 #include "IRGenerator.hpp"
 
 namespace asm2ir {
-class EmulateIRGenerator final : public IRGenerator {
+class FullIRGenerator final : public IRGenerator {
 
 public:
   void buildIR(const AsmParser &parser) override;

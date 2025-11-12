@@ -1,31 +1,34 @@
 #pragma once
 
-// #include "sim.h"
-// #include "bin.h"
-// #include "llvm/Support/raw_ostream.h"
-// #include <cstdint>
-// #include <string>
+#include <cinttypes>
+#include <iostream>
 
-// struct CPU {
-//   static constexpr uint32_t RegSize = 16;
-//   uint32_t RegFile[RegSize] = {};
-//   uint32_t PC;
-//   uint32_t NextPC;
-//   uint32_t Run;
-//   bool DumpInstrs = false;
+extern "C" {
+int simRand();
+void simPutPixel(int x, int y, int argb);
+void simFlush();
+}
 
-//   bool Execute(Binary &Bin, std::string &ErrorMsg);
-//   std::string dumpStatus(Binary &Bin);
+namespace asm2ir {
+struct CPU final {
+  static constexpr uint64_t reg_size = 64;
+  uint32_t reg_file[reg_size] = {};
+  uint32_t pc;
+  uint32_t next_pc;
+  bool run = true;
+  static CPU *cpu;
 
-//   static CPU *C;
-//   static void setCPU(CPU *Cpu) { C = Cpu; }
-// #define ISA_(Opcode_, Name_, SkipArgs_, ReadArgs_, WriteArgs_, Execute_,       \
-//              IRGenExecute_)                                                    \
-//   static void do_##Name_(uint32_t R1, uint32_t R2, uint32_t R3Imm) {           \
-//     if (C->DumpInstrs)                                                         \
-//       llvm::outs() << #Name_ "\n";                                             \
-//     Execute_;                                                                  \
-//   }
-// #include "ISA.h"
-// #undef ISA_
-// };
+  void dumpCPU() const;
+
+  static void setCPU(CPU *cpu_) { cpu = cpu_; }
+
+#define ISA(Opcode, Name, SkipArgs, ReadArgs, WriteArgs, Execute,              \
+            IRGenExecute)                                                      \
+  static void do_##Name(long long rd, long long r1, long long r2imm,           \
+                        long long r3imm) {                                     \
+    Execute;                                                                   \
+  }
+#include "ISA.hpp"
+#undef ISA
+};
+} // namespace asm2ir

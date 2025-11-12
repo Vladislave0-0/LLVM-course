@@ -1,20 +1,42 @@
-// #pragma once
+#pragma once
 
-// #include "bin.h"
-// #include "cpu.h"
-// #include "llvm/IR/LLVMContext.h"
-// #include "llvm/IR/Module.h"
+#include "AsmParser.hpp"
+#include "CPU.hpp"
 
-// struct ExtIR {
-//   llvm::LLVMContext context;
-//   llvm::Module *module;
-//   llvm::Function *mainFunc;
-//   llvm::GlobalVariable *regFile;
-//   llvm::Type *voidType;
-//   llvm::Type *int32Type;
+#include <llvm/IR/IRBuilder.h>
+#include <llvm/IR/LLVMContext.h>
+#include <llvm/IR/Module.h>
 
-//   void buildIR(Binary &Bin);
-//   void dumpIR();
-//   bool verifyIR();
-//   void executeIR(CPU &Cpu);
-// };
+namespace asm2ir {
+using namespace llvm;
+
+class IRGenerator {
+  const std::string_view moduleName = "ASM2IR";
+
+protected:
+  LLVMContext context;
+  std::unique_ptr<Module> IRModule;
+  IRBuilder<> builder;
+
+  Function *printSimPutPixel();
+  Function *printSimFlush();
+  Function *printSimRand();
+
+  const std::string_view appName = "app";
+  const std::string_view simPutPixelName = "simPutPixel";
+  const std::string_view simFlushName = "simFlush";
+  const std::string_view simRandName = "simRand";
+
+public:
+  IRGenerator()
+      : context(), IRModule(std::make_unique<Module>(moduleName, context)),
+        builder(context) {}
+
+  virtual ~IRGenerator() = default;
+
+  virtual void buildIR(const AsmParser &parser) = 0;
+
+  virtual void execute(CPU &cpu) = 0;
+};
+
+} // namespace asm2ir

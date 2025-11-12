@@ -1,15 +1,32 @@
-// #include "include/extIR.h"
-// #include "llvm/ExecutionEngine/ExecutionEngine.h"
-// #include "llvm/ExecutionEngine/GenericValue.h"
-// #include "llvm/IR/IRBuilder.h"
-// #include "llvm/IR/Verifier.h"
-// #include "llvm/Support/TargetSelect.h"
-// #include "llvm/Support/raw_ostream.h"
-// #include <memory>
-// #include <unordered_map>
-// #include <string>
+#include "../include/IRGenerator.hpp"
 
-// using namespace llvm;
+namespace asm2ir {
+
+Function *IRGenerator::printSimPutPixel() {
+  auto *voidTy = Type::getVoidTy(context);
+  auto *i32 = Type::getInt32Ty(context);
+  auto *funcTy = FunctionType::get(voidTy, {i32, i32, i32}, false);
+
+  return Function::Create(funcTy, Function::ExternalLinkage, simPutPixelName,
+                          *IRModule);
+}
+
+Function *IRGenerator::printSimFlush() {
+  auto *voidTy = Type::getVoidTy(context);
+  auto *funcTy = FunctionType::get(voidTy, {}, false);
+
+  return Function::Create(funcTy, Function::ExternalLinkage, simFlushName,
+                          *IRModule);
+}
+
+Function *IRGenerator::printSimRand() {
+  auto *i32 = Type::getInt32Ty(context);
+  auto *funcTy = FunctionType::get(i32, {}, false);
+
+  return Function::Create(funcTy, Function::ExternalLinkage, simRandName,
+                          *IRModule);
+}
+} // namespace asm2ir
 
 // void ExtIR::buildIR(Binary &Bin) {
 //   module = new Module("top", context);
@@ -33,9 +50,9 @@
 //       FunctionType::get(voidType, int32x3Types, false);
 
 //   // Functions
-// #define ISA_(Opcode_, Name_, SkipArgs_, ReadArgs_, WriteArgs_, Execute_,       \
-//              IRGenExecute_)                                                    \
-//   FunctionCallee Callee##Name_ =                                               \
+// #define ISA_(Opcode_, Name_, SkipArgs_, ReadArgs_, WriteArgs_, Execute_, \
+//              IRGenExecute_) \
+//   FunctionCallee Callee##Name_ = \
 //       module->getOrInsertFunction("do_" #Name_, int32x3FuncType);
 // #include "include/ISA.h"
 // #undef ISA_
@@ -55,11 +72,10 @@
 //     switch (I.Op) {
 //     default:
 //       break;
-// #define ISA_(Opcode_, Name_, SkipArgs_, ReadArgs_, WriteArgs_, Execute_,       \
-//              IRGenExecute_)                                                    \
-//   case (Opcode_):                                                              \
-//     builder.CreateCall(Callee##Name_, args);                                   \
-//     break;
+// #define ISA_(Opcode_, Name_, SkipArgs_, ReadArgs_, WriteArgs_, Execute_, \
+//              IRGenExecute_) \
+//   case (Opcode_): \
+//     builder.CreateCall(Callee##Name_, args); \ break;
 // #include "include/ISA.h"
 // #undef ISA_
 //     }
@@ -108,11 +124,12 @@
 //   InitializeNativeTarget();
 //   InitializeNativeTargetAsmPrinter();
 
-//   ExecutionEngine *ee = EngineBuilder(std::unique_ptr<Module>(module)).create();
+//   ExecutionEngine *ee =
+//   EngineBuilder(std::unique_ptr<Module>(module)).create();
 //   ee->InstallLazyFunctionCreator([](const std::string &fnName) -> void * {
-// #define ISA_(Opcode_, Name_, SkipArgs_, ReadArgs_, WriteArgs_, Execute_,       \
-//              IRGenExecute_)                                                    \
-//   if (fnName == "do_" #Name_)                                                  \
+// #define ISA_(Opcode_, Name_, SkipArgs_, ReadArgs_, WriteArgs_, Execute_, \
+//              IRGenExecute_) \
+//   if (fnName == "do_" #Name_) \
 //     return reinterpret_cast<void *>(CPU::do_##Name_);
 // #include "include/ISA.h"
 // #undef ISA_
