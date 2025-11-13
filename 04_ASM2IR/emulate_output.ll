@@ -1,68 +1,45 @@
 ; ModuleID = 'ASM2IR'
 source_filename = "ASM2IR"
 
-@reg_file = global [64 x i64] zeroinitializer
+@reg_file = external global [64 x i64]
 
 define void @app() {
 app:
-  call void @do_MOVi(i64 1, i64 0, i64 0, i64 140730999447696)
-  call void @do_BRANCH(i64 1, i64 0, i64 2, i64 140730999447696)
-  br label %label1
+  call void @do_MOVi(i64 1, i64 0, i64 100, i64 140723542591344)
+  call void @do_MOVi(i64 2, i64 0, i64 100, i64 140723542591344)
+  call void @do_MOVi(i64 6, i64 0, i64 0, i64 140723542591344)
+  call void @do_MOVi(i64 8, i64 0, i64 -65536, i64 140723542591344)
+  call void @do_BRANCH(i64 8, i64 0, i64 5, i64 140723542591344)
+  br label %outer_loop
 
-label1:                                           ; preds = %label7, %app
-  call void @do_MOVi(i64 2, i64 0, i64 0, i64 140730999447696)
-  call void @do_BRANCH(i64 2, i64 0, i64 4, i64 140730999447696)
-  br label %label9
+outer_loop:                                       ; preds = %continue_outer, %app
+  call void @do_MOVi(i64 7, i64 0, i64 0, i64 140723542591344)
+  call void @do_BRANCH(i64 7, i64 0, i64 7, i64 140723542591344)
+  br label %inner_loop
 
-label9:                                           ; preds = %put_pixel, %label1
-  call void @do_SIM_RAND(i64 3, i64 0, i64 4, i64 140730999447696)
-  call void @do_ANDi(i64 3, i64 3, i64 1, i64 140730999447696)
-  call void @do_CMP_EQ(i64 0, i64 3, i64 0, i64 140730999447696)
-  call void @do_BR_COND(i64 0, i64 3, i64 14, i64 8)
-  %0 = load i64, ptr @reg_file, align 4
+inner_loop:                                       ; preds = %inner_loop, %outer_loop
+  call void @do_ADD(i64 3, i64 1, i64 7, i64 140723542591344)
+  call void @do_ADD(i64 4, i64 2, i64 6, i64 140723542591344)
+  call void @do_SCREEN_PUT_PIXEL(i64 3, i64 4, i64 8, i64 140723542591344)
+  call void @do_ADDi(i64 7, i64 7, i64 1, i64 140723542591344)
+  call void @do_CMP_LT(i64 9, i64 7, i64 100, i64 140723542591344)
+  call void @do_BR_COND(i64 9, i64 7, i64 7, i64 13)
+  %0 = load i64, ptr getelementptr inbounds ([64 x i64], ptr @reg_file, i32 0, i32 9), align 4
   %1 = trunc i64 %0 to i1
-  br i1 %1, label %set_black, label %set_color
+  br i1 %1, label %inner_loop, label %continue_outer
 
-set_color:                                        ; preds = %label9
-  call void @do_MOV(i64 4, i64 2, i64 14, i64 8)
-  call void @do_SHL(i64 4, i64 4, i64 9, i64 8)
-  call void @do_ADD(i64 4, i64 4, i64 1, i64 8)
-  call void @do_SHL(i64 4, i64 4, i64 7, i64 8)
-  call void @do_ADDi(i64 4, i64 4, i64 16711680, i64 8)
-  call void @do_BRANCH(i64 4, i64 4, i64 16, i64 8)
-  br label %put_pixel
-
-set_black:                                        ; preds = %label9
-  call void @do_MOVi(i64 4, i64 4, i64 -16777216, i64 8)
-  call void @do_BRANCH(i64 4, i64 4, i64 16, i64 8)
-  br label %put_pixel
-
-put_pixel:                                        ; preds = %set_black, %set_color
-  call void @do_SCREEN_PUT_PIXEL(i64 1, i64 2, i64 4, i64 8)
-  call void @do_ADDi(i64 2, i64 2, i64 1, i64 8)
-  call void @do_CMP_EQ(i64 0, i64 2, i64 256, i64 8)
-  call void @do_BR_COND(i64 0, i64 2, i64 4, i64 20)
-  %2 = load i64, ptr @reg_file, align 4
+continue_outer:                                   ; preds = %inner_loop
+  call void @do_ADDi(i64 6, i64 6, i64 1, i64 13)
+  call void @do_CMP_LT(i64 9, i64 6, i64 100, i64 13)
+  call void @do_BR_COND(i64 9, i64 6, i64 5, i64 16)
+  %2 = load i64, ptr getelementptr inbounds ([64 x i64], ptr @reg_file, i32 0, i32 9), align 4
   %3 = trunc i64 %2 to i1
-  br i1 %3, label %label9, label %label4
+  br i1 %3, label %outer_loop, label %finish
 
-label4:                                           ; preds = %put_pixel
-  call void @do_ADDi(i64 1, i64 1, i64 1, i64 20)
-  call void @do_CMP_EQ(i64 0, i64 1, i64 512, i64 20)
-  call void @do_BR_COND(i64 0, i64 1, i64 26, i64 23)
-  %4 = load i64, ptr @reg_file, align 4
-  %5 = trunc i64 %4 to i1
-  br i1 %5, label %label7, label %flush
-
-flush:                                            ; preds = %label4
-  call void @do_SCREEN_FLUSH(i64 0, i64 1, i64 26, i64 23)
-  call void @do_MOVi(i64 1, i64 1, i64 0, i64 23)
-  call void @do_BRANCH(i64 1, i64 1, i64 26, i64 23)
-  br label %label7
-
-label7:                                           ; preds = %flush, %label4
-  call void @do_BRANCH(i64 1, i64 1, i64 2, i64 23)
-  br label %label1
+finish:                                           ; preds = %continue_outer
+  call void @do_SCREEN_FLUSH(i64 9, i64 6, i64 5, i64 16)
+  call void @do_EXIT(i64 9, i64 6, i64 5, i64 16)
+  ret void
 }
 
 declare void @do_EXIT(i64, i64, i64, i64)
@@ -90,3 +67,9 @@ declare void @do_SCREEN_FLUSH(i64, i64, i64, i64)
 declare void @do_SCREEN_PUT_PIXEL(i64, i64, i64, i64)
 
 declare void @do_SHL(i64, i64, i64, i64)
+
+declare void @do_CMP_LT(i64, i64, i64, i64)
+
+declare void @do_DUMP_REG(i64, i64, i64, i64)
+
+declare void @do_DUMP_REGS(i64, i64, i64, i64)

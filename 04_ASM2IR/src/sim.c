@@ -62,4 +62,9 @@ void simPutPixel(int x, int y, int argb) {
   Ticks = SDL_GetTicks();
 }
 
-int simRand() { return rand() % 3 % 2; }
+int simRand() { return rand(); }
+
+void dumpReg(long long reg_num, long long reg_val) {
+    printf("[DUMP_REG] x%llu = %llu\n", reg_num, reg_val);
+}
+

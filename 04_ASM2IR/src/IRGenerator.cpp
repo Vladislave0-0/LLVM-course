@@ -27,4 +27,13 @@ Function *IRGenerator::printSimRand() {
                           *IRModule);
 }
 
+Function *IRGenerator::printDumpReg() {
+  auto *i64 = Type::getInt64Ty(context);
+  FunctionType *funcTy =
+      FunctionType::get(builder.getVoidTy(), {i64, i64}, false);
+
+  return Function::Create(funcTy, Function::ExternalLinkage, dumpRegName,
+                          *IRModule);
+}
+
 } // namespace asm2ir

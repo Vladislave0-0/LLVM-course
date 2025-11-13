@@ -38,6 +38,8 @@ bool AsmParser::searchBBs(std::ifstream &input) {
   while (input >> name) {
     opcode = instrs_info.getOpCode(name);
 
+    // std::cout << "[DEBUG] Processing instruction: " << name << std::endl;
+
     switch (opcode) {
     default:
       if (bb2pc.find(name) != bb2pc.end()) {

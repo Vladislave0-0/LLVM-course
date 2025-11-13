@@ -43,7 +43,7 @@ int main(int argc, char **argv) {
   }
 
   generator->buildIR(parser);
-  if (llvm::verifyModule(*generator->getIRModule(), &errs())) {
+  if (llvm::verifyModule(*generator->getIRModule(), &outs())) {
     std::cout << "[Verification] Failed." << std::endl;
     return 1;
   }

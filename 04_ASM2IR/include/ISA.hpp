@@ -13,6 +13,7 @@
 // IRGenExecute_)
 
 //=================================SkipArgs=====================================
+// #include <SDL2/SDL_stdinc.h>
 #define SKIP_1ARG                                                              \
   { input >> arg; }
 
@@ -20,7 +21,11 @@
   { input >> arg >> arg; }
 
 #define SKIP_3ARGS                                                             \
-  { input >> arg >> arg >> arg; }
+  {                                                                            \
+    input >> arg;                                                              \
+    input >> arg;                                                              \
+    input >> arg;                                                              \
+  }
 
 #define SKIP_4ARGS                                                             \
   { input >> arg >> arg >> arg >> arg; }
@@ -34,52 +39,52 @@
     I.reg = std::stoi(arg.substr(1));                                          \
   }
 
-#define READ_2IMM                                                              \
+#define READ_TO_R2IMM                                                          \
   {                                                                            \
     input >> arg;                                                              \
     I.r2imm = std::stoi(arg);                                                  \
   }
 
-#define READ_3IMM                                                              \
+#define READ_TO_R3IMM                                                          \
   {                                                                            \
     input >> arg;                                                              \
     I.r3imm = std::stoi(arg);                                                  \
   }
 
-#define READ_2LABEL                                                            \
+#define READ_LABEL_TO_R2IMM                                                    \
   {                                                                            \
     input >> arg;                                                              \
-    std::cout << "<label>: arg = " << arg << std::endl;                        \
     if (bb2pc.find(arg) == bb2pc.end())                                        \
       return true;                                                             \
                                                                                \
-    std::cout << "r2imm = " << bb2pc[arg] << '\n';                             \
     I.r2imm = bb2pc[arg];                                                      \
   }
 
-#define READ_3LABEL                                                            \
+#define READ_LABEL_TO_R3IMM                                                    \
   {                                                                            \
     input >> arg;                                                              \
-    std::cout << "<label>: arg = " << arg << std::endl;                        \
     if (bb2pc.find(arg) == bb2pc.end())                                        \
       return true;                                                             \
                                                                                \
-    std::cout << "r3imm = " << bb2pc[arg] << '\n';                             \
     I.r3imm = bb2pc[arg];                                                      \
   }
 
 #define READ_2REGS {READ_REG(rd) READ_REG(r1)}
-#define READ_3REGS {READ_REG(rd) READ_REG(r1) READ_REG(r2imm)}
-#define READ_4REGS {READ_REG(rd) READ_REG(r1) READ_REG(r2imm) READ_REG(r3imm)}
+#define READ_3REGS {READ_2REGS READ_REG(r2imm)}
+#define READ_4REGS {READ_3REGS READ_REG(r3imm)}
 
-#define READ_2REGS_IMM {READ_2REGS READ_2IMM}
-#define READ_3REGS_IMM {READ_3REGS READ_3IMM}
+#define READ_2REGS_R2IMM                                                       \
+  {                                                                            \
+    READ_REG(rd) READ_REG(r1);                                                 \
+    READ_TO_R2IMM                                                              \
+  }
+#define READ_3REGS_R3IMM {READ_3REGS READ_TO_R3IMM}
 
-#define READ_REG_2LABEL {READ_REG(rd) READ_2LABEL}
-#define READ_REG_3LABEL {READ_REG_2LABEL READ_3LABEL}
+#define READ_REG_LABEL_TO_R2IMM {READ_REG(rd) READ_LABEL_TO_R2IMM}
+#define READ_REG_LABEL_TO_R3IMM {READ_REG_LABEL_TO_R2IMM READ_LABEL_TO_R3IMM}
 
-#define READ_REG_IMM {READ_REG(rd) READ_2IMM}
-#define READ_2REGS_IMM_REG {READ_2REGS_IMM READ_REG(rs3imm)}
+#define READ_REG_R2IMM {READ_REG(rd) READ_TO_R2IMM}
+// #define READ_2REGS_R2IMM_REG {READ_2REGS_R2IMM READ_REG(rs3imm)}
 
 //==============================================================================
 
@@ -133,7 +138,7 @@ ISA(
     })
 
 ISA(
-    0x3, ADDi, SKIP_3ARGS, READ_2REGS_IMM, WRITE_2REGS_IMM,
+    0x3, ADDi, SKIP_3ARGS, READ_2REGS_R2IMM, WRITE_2REGS_IMM,
     { cpu->reg_file[rd] = cpu->reg_file[r1] + r2imm; },
     {
       STORE(builder.CreateAdd(LOAD_REG(I.r1), GEN_IMM(I.r2imm)), GEP2_64(I.rd));
@@ -145,11 +150,15 @@ ISA(
     { STORE(LOAD_REG(I.r1), GEP2_64(I.rd)); })
 
 ISA(
-    0x5, MOVi, SKIP_2ARGS, READ_REG_IMM, WRITE_REG_IMM,
-    { cpu->reg_file[rd] = r2imm; }, { STORE(GEN_IMM(I.r2imm), GEP2_64(I.rd)); })
+    0x5, MOVi, SKIP_2ARGS, READ_REG_R2IMM, WRITE_REG_IMM,
+    {
+      cpu->reg_file[rd] = r2imm;
+      // std::cout << "[DEBUG] MOVi: rd = " << r2imm << "\n";
+    },
+    { STORE(GEN_IMM(I.r2imm), GEP2_64(I.rd)); })
 
 ISA(
-    0x6, BR_COND, SKIP_3ARGS, READ_REG_3LABEL, WRITE_REG_3LABEL,
+    0x6, BR_COND, SKIP_3ARGS, READ_REG_LABEL_TO_R3IMM, WRITE_REG_3LABEL,
     {
       if (cpu->reg_file[rd]) {
         cpu->next_pc = r2imm;
@@ -166,7 +175,7 @@ ISA(
     })
 
 ISA(
-    0x7, BRANCH, SKIP_1ARG, READ_2LABEL, WRITE_2LABEL,
+    0x7, BRANCH, SKIP_1ARG, READ_LABEL_TO_R2IMM, WRITE_2LABEL,
     { cpu->next_pc = r2imm; },
     {
       builder.CreateBr(BBMap[I.r2imm]);
@@ -175,8 +184,8 @@ ISA(
     })
 
 ISA(
-    0x8, CMP_EQ, SKIP_3ARGS, READ_2REGS_IMM, WRITE_2REGS_IMM,
-    { cpu->reg_file[rd] = (cpu->reg_file[r1] == r2imm); },
+    0x8, CMP_EQ, SKIP_3ARGS, READ_2REGS_R2IMM, WRITE_2REGS_IMM,
+    { cpu->reg_file[rd] = (cpu->reg_file[r1] == r2imm) ? 1 : 0; },
     {
       STORE(builder.CreateZExt(
                 builder.CreateICmpEQ(LOAD_REG(I.r1), GEN_IMM(I.r2imm)),
@@ -185,7 +194,7 @@ ISA(
     })
 
 ISA(
-    0x9, ANDi, SKIP_3ARGS, READ_2REGS_IMM, WRITE_2REGS_IMM,
+    0x9, ANDi, SKIP_3ARGS, READ_2REGS_R2IMM, WRITE_2REGS_IMM,
     { cpu->reg_file[rd] = cpu->reg_file[r1] & r2imm; },
     {
       STORE(builder.CreateAnd({LOAD_REG(I.r1), GEN_IMM(I.r2imm)}),
@@ -219,8 +228,40 @@ ISA(
     })
 
 ISA(
-    0xd, SHL, SKIP_3ARGS, READ_2REGS_IMM, WRITE_2REGS_IMM,
+    0xd, SHL, SKIP_3ARGS, READ_2REGS_R2IMM, WRITE_2REGS_IMM,
     { cpu->reg_file[rd] = cpu->reg_file[r1] << r2imm; },
     {
       STORE(builder.CreateShl(LOAD_REG(I.r1), GEN_IMM(I.r2imm)), GEP2_64(I.rd));
+    })
+
+ISA(
+    0xe, CMP_LT, SKIP_3ARGS, READ_2REGS_R2IMM, WRITE_2REGS_IMM,
+    { cpu->reg_file[rd] = (cpu->reg_file[r1] < r2imm) ? 1 : 0; },
+    {
+      STORE(builder.CreateZExt(
+                builder.CreateICmpSLT(LOAD_REG(I.r1), GEN_IMM(I.r2imm)),
+                builder.getInt64Ty()),
+            GEP2_64(I.rd));
+    })
+
+ISA(
+    0xf, DUMP_REG, SKIP_1ARG, READ_REG(rd), WRITE_REG(rd),
+    { dumpReg(rd, cpu->reg_file[rd]); },
+    { builder.CreateCall(dumpReg, {GEN_IMM(I.rd), LOAD_REG(I.rd)}); })
+
+ISA(
+    0xff, DUMP_REGS, SKIP_2ARGS, READ_2REGS, WRITE_2REGS,
+    {
+      std::cout << "\n[START_DUMP_REGS]\n";
+      for (long long i = rd; i <= r1; ++i) {
+        dumpReg(i, cpu->reg_file[i]);
+      }
+      std::cout << "[END_DUMP_REGS]\n\n";
+    },
+    { 
+      // std::cout << "\n[START_DUMP_REGS]\n";
+      // for (long long i = rd; i <= r1; ++i) {
+      //   builder.CreateCall(dumpReg, {GEN_IMM(I.rd), LOAD_REG(I.rd)});
+      // }
+      // std::cout << "[END_DUMP_REGS]\n\n";
     })

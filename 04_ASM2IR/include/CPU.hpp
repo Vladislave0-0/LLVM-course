@@ -1,11 +1,13 @@
 #pragma once
 
 #include <cstdint>
+#include <iostream>
 
 extern "C" {
 int simRand();
 void simPutPixel(int x, int y, int argb);
 void simFlush();
+void dumpReg(long long reg_num, long long reg_val);
 }
 
 namespace asm2ir {
