@@ -14,7 +14,11 @@ void simExit();
 }
 
 void FullIRGenerator::buildIR(const AsmParser &parser) {
-  auto int64Ty = Type::getInt64Ty(context);
+  auto i64Ty = Type::getInt64Ty(context);
+
+  ArrayType *regFileType = ArrayType::get(i64Ty, CPU::reg_size);
+  IRModule->getOrInsertGlobal("reg_file", regFileType);
+  reg_file = IRModule->getNamedGlobal("reg_file");
 
   FunctionType *FuncType = FunctionType::get(Type::getVoidTy(context), false);
   Function *AppFunc =
@@ -32,9 +36,6 @@ void FullIRGenerator::buildIR(const AsmParser &parser) {
   uint32_t pc = 0;
 
   builder.SetInsertPoint(BBMap[0]);
-  ArrayType *regFileType = ArrayType::get(int64Ty, CPU::reg_size);
-  Value *reg_file = builder.CreateAlloca(regFileType);
-
   for (const Instruction &I : parser.instructions) {
     switch (I.opcode) {
     default:
@@ -78,6 +79,7 @@ void FullIRGenerator::execute(CPU &cpu) {
     return nullptr;
   });
 
+  ee->addGlobalMapping(reg_file, (void *)cpu.reg_file);
   ee->finalizeObject();
 
   simInit();
