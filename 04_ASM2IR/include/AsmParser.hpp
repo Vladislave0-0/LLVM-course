@@ -18,8 +18,8 @@ struct AsmParser final {
   AsmParser(const std::string &filename) : filename(filename) {};
 
   bool parse();
-  bool searchBBs(std::ifstream &input);
-  bool readInstructions(std::ifstream &input);
+  bool searchBBs(std::istream &input);
+  bool readInstructions(std::istream &input);
 };
 
 } // namespace asm2ir

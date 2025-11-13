@@ -1,34 +1,91 @@
 #include "../include/AsmParser.hpp"
 #include "../include/Instructions.hpp"
 
+#include <algorithm>
+#include <cctype>
 #include <fstream>
 #include <iostream>
+#include <sstream>
+#include <vector>
 
 namespace asm2ir {
-bool AsmParser::parse() {
-  std::ifstream file{filename};
 
-  if (!file.is_open()) {
-    std::cout << std::string("Can't open " + filename) << std::endl;
+// Удаление пробелов в начале и конце строки.
+static inline void trim(std::string &s) {
+  s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch) {
+            return !std::isspace(ch);
+          }));
+  s.erase(std::find_if(s.rbegin(), s.rend(),
+                       [](unsigned char ch) { return !std::isspace(ch); })
+              .base(),
+          s.end());
+}
+
+// Удаление комментариев.
+static inline std::string removeComments(const std::string &line) {
+  size_t commentPos = line.find(';');
+
+  if (commentPos != std::string::npos)
+    return line.substr(0, commentPos);
+
+  return line;
+}
+
+static std::vector<std::string>
+readAndFilterTokens(const std::string &filename) {
+  std::ifstream file{filename};
+  std::vector<std::string> tokens;
+
+  if (!file.is_open())
+    return tokens;
+
+  std::string line;
+  while (std::getline(file, line)) {
+    line = removeComments(line);
+    trim(line);
+
+    // Пропуск пустых строк.
+    if (line.empty())
+      continue;
+
+    // Разбиваем строку на токены.
+    std::istringstream iss(line);
+    std::string token;
+    while (iss >> token)
+      tokens.push_back(token);
+  }
+
+  return tokens;
+}
+
+bool AsmParser::parse() {
+  auto tokens = readAndFilterTokens(filename);
+
+  if (tokens.empty()) {
+    std::cout << "Can't open or file is empty: " + filename << std::endl;
     return false;
   }
 
   instrs_info.prepareInfo();
 
-  if (!searchBBs(file))
+  std::stringstream tokenStream;
+  for (const auto &token : tokens)
+    tokenStream << token << " ";
+
+  if (!searchBBs(tokenStream))
     return false;
 
-  // Возврат каретки.
-  file.clear();
-  file.seekg(0, std::ios::beg);
+  // Сброс потока и возврат каретки.
+  tokenStream.clear();
+  tokenStream.seekg(0);
 
-  if (!readInstructions(file))
+  if (!readInstructions(tokenStream))
     return false;
 
   return true;
 }
 
-bool AsmParser::searchBBs(std::ifstream &input) {
+bool AsmParser::searchBBs(std::istream &input) {
   std::string name;
   std::string arg;
 
@@ -37,8 +94,6 @@ bool AsmParser::searchBBs(std::ifstream &input) {
 
   while (input >> name) {
     opcode = instrs_info.getOpCode(name);
-
-    // std::cout << "[DEBUG] Processing instruction: " << name << std::endl;
 
     switch (opcode) {
     default:
@@ -56,7 +111,6 @@ bool AsmParser::searchBBs(std::ifstream &input) {
       bb2pc[name] = pc;
       basic_blocks.emplace_back(name);
       pc2bb[pc] = name;
-
       continue;
 
 #define ISA(Opcode, Name, SkipArgs, ReadArgs, WriteArgs, Execute,              \
@@ -74,7 +128,7 @@ bool AsmParser::searchBBs(std::ifstream &input) {
   return true;
 }
 
-bool AsmParser::readInstructions(std::ifstream &input) {
+bool AsmParser::readInstructions(std::istream &input) {
   std::string name;
   std::string arg;
 

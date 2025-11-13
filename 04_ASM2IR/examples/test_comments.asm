@@ -1,5 +1,6 @@
-app
+app ; тут какой-то комментарий
 MOVi x1 100
+; и тут какой-то комментарий
 MOVi x2 100
 MOVi x6 0
 MOVi x8 -65536
@@ -25,3 +26,4 @@ BR_COND x9 outer_loop finish
 finish
 SCREEN_FLUSH
 EXIT
+; и еще вот тут
