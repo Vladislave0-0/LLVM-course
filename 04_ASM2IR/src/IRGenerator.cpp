@@ -36,4 +36,12 @@ Function *IRGenerator::printDumpReg() {
                           *IRModule);
 }
 
+Function *IRGenerator::printDumpGrid() {
+  FunctionType *funcTy = FunctionType::get(
+      builder.getVoidTy(), {builder.getInt32Ty()->getPointerTo()}, false);
+
+  return Function::Create(funcTy, Function::ExternalLinkage, dumpGridName,
+                          *IRModule);
+}
+
 } // namespace asm2ir

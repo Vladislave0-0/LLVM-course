@@ -2,12 +2,14 @@
 
 #include <cstdint>
 #include <iostream>
+#include <cstring>
 
 extern "C" {
 int simRand();
 void simPutPixel(int x, int y, int argb);
 void simFlush();
 void dumpReg(long long reg_num, long long reg_val);
+void dumpGrid(int* grid);
 }
 
 namespace asm2ir {

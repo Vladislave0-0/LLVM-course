@@ -65,6 +65,17 @@ void simPutPixel(int x, int y, int argb) {
 int simRand() { return rand(); }
 
 void dumpReg(long long reg_num, long long reg_val) {
-    printf("[DUMP_REG] x%llu = %llu\n", reg_num, reg_val);
+  printf("[DUMP_REG] x%llu = %llu\n", reg_num, reg_val);
 }
 
+void dumpGrid(int *grid) {
+  printf("[DUMP_GRID] %p\n", grid);
+
+  for (int i = 0; i < SIM_X_SIZE; ++i) {
+    for (int j = 0; j < SIM_Y_SIZE; ++j)
+      printf("%d ", grid[i * SIM_Y_SIZE + j]);
+    printf("\n");
+  }
+
+  printf("\n");
+}

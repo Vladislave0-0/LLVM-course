@@ -15,9 +15,10 @@ void simExit();
 
 void FullIRGenerator::buildIR(const AsmParser &parser) {
   auto i64Ty = Type::getInt64Ty(context);
+  auto i32PtrTy = Type::getInt32Ty(context)->getPointerTo();
 
-  ArrayType *regFileType = ArrayType::get(i64Ty, CPU::reg_size);
-  IRModule->getOrInsertGlobal("reg_file", regFileType);
+  ArrayType *regFileTy = ArrayType::get(i64Ty, CPU::reg_size);
+  IRModule->getOrInsertGlobal("reg_file", regFileTy);
   reg_file = IRModule->getNamedGlobal("reg_file");
 
   FunctionType *FuncType = FunctionType::get(Type::getVoidTy(context), false);
@@ -28,6 +29,7 @@ void FullIRGenerator::buildIR(const AsmParser &parser) {
   auto *simPutPixel = printSimPutPixel();
   auto *simRand = printSimRand();
   auto *dumpReg = printDumpReg();
+  auto *dumpGrid = printDumpGrid();
 
   std::unordered_map<uint32_t, BasicBlock *> BBMap;
   for (auto &BB : parser.basic_blocks)
@@ -59,6 +61,7 @@ void FullIRGenerator::execute(CPU &cpu) {
   execModule->getFunction(simFlushName);
   execModule->getFunction(simRandName);
   execModule->getFunction(dumpRegName);
+  execModule->getFunction(dumpGridName);
   execModule->getFunction(simPutPixelName);
 
   LLVMInitializeNativeTarget();
@@ -72,6 +75,8 @@ void FullIRGenerator::execute(CPU &cpu) {
       return reinterpret_cast<void *>(simRand);
     } else if (fnName == dumpRegName) {
       return reinterpret_cast<void *>(dumpReg);
+    } else if (fnName == dumpGridName) {
+      return reinterpret_cast<void *>(dumpGrid);
     } else if (fnName == simPutPixelName) {
       return reinterpret_cast<void *>(simPutPixel);
     }

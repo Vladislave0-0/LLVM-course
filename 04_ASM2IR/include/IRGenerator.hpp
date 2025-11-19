@@ -23,12 +23,14 @@ protected:
   Function *printSimFlush();
   Function *printSimRand();
   Function *printDumpReg();
+  Function *printDumpGrid();
 
   const std::string_view appName = "app";
   const std::string_view simPutPixelName = "simPutPixel";
   const std::string_view simFlushName = "simFlush";
   const std::string_view simRandName = "simRand";
   const std::string_view dumpRegName = "dumpReg";
+  const std::string_view dumpGridName = "dumpGrid";
 
 public:
   IRGenerator()
