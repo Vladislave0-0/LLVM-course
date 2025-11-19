@@ -12,8 +12,8 @@
 // ISA(Opcode_, Name_, SkipArgs_, ReadArgs_, WriteArgs_, Execute_,
 // IRGenExecute_)
 
-#define SIM_X_SIZE 32
-#define SIM_Y_SIZE 32
+#define SIM_X_SIZE 512
+#define SIM_Y_SIZE 512
 #define I32_SIZE 4
 
 //=================================SkipArgs=====================================
@@ -252,13 +252,7 @@ ISA(0x10, DUMP_REGS, SKIP_2ARGS, READ_2REGS, WRITE_2REGS,
       }
       std::cout << "[END_DUMP_REGS]\n\n";
     },
-    {
-        // std::cout << "\n[START_DUMP_REGS]\n";
-        // for (long long i = rd; i <= r1; ++i) {
-        //   builder.CreateCall(dumpReg, {GEN_IMM(I.rd), LOAD_REG(I.rd)});
-        // }
-        // std::cout << "[END_DUMP_REGS]\n\n";
-    })
+    {})
 
 ISA(
     0x11, INC_EQ, SKIP_3ARGS, READ_2REGS_R2IMM, WRITE_2REGS_R2IMM,
@@ -374,5 +368,15 @@ ISA(
     { cpu->reg_file[rd] = cpu->reg_file[r1] | cpu->reg_file[r2imm]; },
     {
       STORE(builder.CreateOr({LOAD_REG(I.r1), LOAD_REG(I.r2imm)}),
+            GEP2_64(I.rd));
+    })
+
+ISA(
+    0x1c, CMP_GE, SKIP_3ARGS, READ_2REGS_R2IMM, WRITE_2REGS_R2IMM,
+    { cpu->reg_file[rd] = (cpu->reg_file[r1] >= r2imm) ? 1 : 0; },
+    {
+      STORE(builder.CreateZExt(
+                builder.CreateICmpSGE(LOAD_REG(I.r1), GEN_IMM(I.r2imm)),
+                builder.getInt64Ty()),
             GEP2_64(I.rd));
     })
