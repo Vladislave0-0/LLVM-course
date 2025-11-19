@@ -17,8 +17,8 @@ void EmulateIRGenerator::buildIR(const AsmParser &parser) {
   auto voidTy = Type::getVoidTy(context);
   auto i64Ty = Type::getInt64Ty(context);
 
-  ArrayType *regFileType = ArrayType::get(i64Ty, CPU::reg_size);
-  IRModule->getOrInsertGlobal("reg_file", regFileType);
+  ArrayType *regFileTy = ArrayType::get(i64Ty, CPU::reg_size);
+  IRModule->getOrInsertGlobal("reg_file", regFileTy);
   reg_file = IRModule->getNamedGlobal("reg_file");
 
   FunctionType *funcTy = FunctionType::get(voidTy, false);
@@ -69,12 +69,10 @@ void EmulateIRGenerator::buildIR(const AsmParser &parser) {
 
     switch (I.opcode) {
     case Instruction::BR_COND:
-      arg1 = builder.CreateConstGEP2_32(regFileType, reg_file, 0,
-                                        static_cast<unsigned>(I.rd));
+      arg1 = builder.CreateConstGEP2_32(regFileTy, reg_file, 0, I.rd);
       arg2 = builder.CreateTrunc(builder.CreateLoad(i64Ty, arg1),
                                  builder.getInt1Ty());
-      if (BB != BBMap.end())
-        builder.CreateCondBr(arg2, BBMap[I.r2imm], BB->second);
+      builder.CreateCondBr(arg2, BBMap[I.r2imm], BBMap[I.r3imm]);
       break;
 
     case Instruction::BRANCH:
