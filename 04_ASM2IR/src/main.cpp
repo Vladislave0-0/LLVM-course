@@ -7,7 +7,6 @@
 using namespace asm2ir;
 
 int main(int argc, char **argv) {
-
   CLI::App app{"ASM to LLVM IR generator"};
 
   std::string asmFile;

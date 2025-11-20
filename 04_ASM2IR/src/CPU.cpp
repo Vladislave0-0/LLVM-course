@@ -1,5 +1,4 @@
 #include "../include/CPU.hpp"
-#include <iostream>
 
 namespace asm2ir {
 

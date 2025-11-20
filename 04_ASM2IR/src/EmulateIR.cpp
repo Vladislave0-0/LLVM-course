@@ -37,8 +37,6 @@ void EmulateIRGenerator::buildIR(const AsmParser &parser) {
 
   std::unordered_map<uint32_t, BasicBlock *> BBMap;
   for (auto &BB : parser.basic_blocks) {
-    // std::cout << "Add bb at pc = " << parser.bb2pc.at(BB)
-    //           << " with name = " << BB << '\n';
     BBMap[parser.bb2pc.at(BB)] = BasicBlock::Create(context, BB, appFunc);
   }
 

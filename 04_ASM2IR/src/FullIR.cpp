@@ -1,9 +1,6 @@
 #include "../include/FullIR.hpp"
-#include "../include/AsmParser.hpp"
-#include "CPU.hpp"
 #include <llvm-18/llvm/ExecutionEngine/ExecutionEngine.h>
 #include <llvm-18/llvm/ExecutionEngine/GenericValue.h>
-#include <llvm-18/llvm/IR/Verifier.h>
 #include <llvm-18/llvm/Transforms/Utils/Cloning.h>
 
 namespace asm2ir {

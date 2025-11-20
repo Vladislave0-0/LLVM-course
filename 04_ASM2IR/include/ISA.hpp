@@ -85,19 +85,12 @@
 #define READ_REG_2LABELS {READ_REG_LABEL READ_LABEL_TO_R3IMM}
 
 #define READ_REG_R2IMM {READ_REG(rd) READ_TO_R2IMM}
-// #define READ_2REGS_R2IMM_REG {READ_2REGS_R2IMM READ_REG(rs3imm)}
 
 //==============================================================================
 
 //=================================WriteArgs=====================================
 #define WRITE_REG(reg)                                                         \
   { stream << " x" << I.reg; }
-
-// #define WRITE_R2IMM                                                             \
-//   { stream << " " << I.r2imm; }
-
-// #define WRITE_R3IMM                                                             \
-//   { stream << " " << I.r3imm; }
 
 #define WRITE_LABEL_TO_R2IMM                                                   \
   { stream << " " << pc2bb[I.r2imm]; }
@@ -123,13 +116,13 @@
 #define LOAD_PTR(arg) builder.CreateLoad(i32PtrTy, GEP2_64(arg))
 #define GEN_IMM(arg) builder.getInt64(arg)
 
+//==============================================================
+
 // ISA(Opcode_, Name_, SkipArgs_, ReadArgs_, WriteArgs_, Execute_,
 // IRGenExecute_)
 
-ISA(0x1, EXIT, {}, {}, {}, { cpu->run = false; }, { builder.CreateRetVoid(); })
-
 ISA(
-    0x2, ADD, SKIP_3ARGS, READ_3REGS, WRITE_3REGS,
+    0x1, ADD, SKIP_3ARGS, READ_3REGS, WRITE_3REGS,
     { cpu->reg_file[rd] = cpu->reg_file[r1] + cpu->reg_file[r2imm]; },
     {
       STORE(builder.CreateAdd(LOAD_REG(I.r1), LOAD_REG(I.r2imm)),
@@ -137,23 +130,108 @@ ISA(
     })
 
 ISA(
-    0x3, ADDi, SKIP_3ARGS, READ_2REGS_R2IMM, WRITE_2REGS_R2IMM,
+    0x2, ADDi, SKIP_3ARGS, READ_2REGS_R2IMM, WRITE_2REGS_R2IMM,
     { cpu->reg_file[rd] = cpu->reg_file[r1] + r2imm; },
     {
       STORE(builder.CreateAdd(LOAD_REG(I.r1), GEN_IMM(I.r2imm)), GEP2_64(I.rd));
     })
 
 ISA(
-    0x4, MOV, SKIP_2ARGS, READ_2REGS, WRITE_2REGS,
+    0x3, MOV, SKIP_2ARGS, READ_2REGS, WRITE_2REGS,
     { cpu->reg_file[rd] = cpu->reg_file[r1]; },
     { STORE(LOAD_REG(I.r1), GEP2_64(I.rd)); })
 
 ISA(
-    0x5, MOVi, SKIP_2ARGS, READ_REG_R2IMM, WRITE_2REGS,
+    0x4, MOVi, SKIP_2ARGS, READ_REG_R2IMM, WRITE_2REGS,
     { cpu->reg_file[rd] = r2imm; }, { STORE(GEN_IMM(I.r2imm), GEP2_64(I.rd)); })
 
 ISA(
-    0x6, BR_COND, SKIP_3ARGS, READ_REG_2LABELS, WRITE_REG_2LABELS,
+    0x5, SHL, SKIP_3ARGS, READ_2REGS_R2IMM, WRITE_2REGS_R2IMM,
+    { cpu->reg_file[rd] = cpu->reg_file[r1] << r2imm; },
+    {
+      STORE(builder.CreateShl(LOAD_REG(I.r1), GEN_IMM(I.r2imm)), GEP2_64(I.rd));
+    })
+
+ISA(
+    0x6, OR, SKIP_3ARGS, READ_3REGS, WRITE_3REGS,
+    { cpu->reg_file[rd] = cpu->reg_file[r1] | cpu->reg_file[r2imm]; },
+    {
+      STORE(builder.CreateOr({LOAD_REG(I.r1), LOAD_REG(I.r2imm)}),
+            GEP2_64(I.rd));
+    })
+
+ISA(
+    0x7, AND, SKIP_3ARGS, READ_3REGS, WRITE_3REGS,
+    { cpu->reg_file[rd] = cpu->reg_file[r1] & cpu->reg_file[r2imm]; },
+    {
+      STORE(builder.CreateAnd({LOAD_REG(I.r1), LOAD_REG(I.r2imm)}),
+            GEP2_64(I.rd));
+    })
+
+ISA(
+    0x8, ANDi, SKIP_3ARGS, READ_2REGS_R2IMM, WRITE_2REGS_R2IMM,
+    { cpu->reg_file[rd] = cpu->reg_file[r1] & r2imm; },
+    {
+      STORE(builder.CreateAnd({LOAD_REG(I.r1), GEN_IMM(I.r2imm)}),
+            GEP2_64(I.rd));
+    })
+
+ISA(
+    0x9, CMP_EQ, SKIP_3ARGS, READ_2REGS_R2IMM, WRITE_2REGS_R2IMM,
+    { cpu->reg_file[rd] = (cpu->reg_file[r1] == r2imm) ? 1 : 0; },
+    {
+      STORE(builder.CreateZExt(
+                builder.CreateICmpEQ(LOAD_REG(I.r1), GEN_IMM(I.r2imm)),
+                builder.getInt64Ty()),
+            GEP2_64(I.rd));
+    })
+
+ISA(
+    0xa, CMP_LT, SKIP_3ARGS, READ_2REGS_R2IMM, WRITE_2REGS_R2IMM,
+    { cpu->reg_file[rd] = (cpu->reg_file[r1] < r2imm) ? 1 : 0; },
+    {
+      STORE(builder.CreateZExt(
+                builder.CreateICmpSLT(LOAD_REG(I.r1), GEN_IMM(I.r2imm)),
+                builder.getInt64Ty()),
+            GEP2_64(I.rd));
+    })
+
+ISA(
+    0xb, CMP_GE, SKIP_3ARGS, READ_2REGS_R2IMM, WRITE_2REGS_R2IMM,
+    { cpu->reg_file[rd] = (cpu->reg_file[r1] >= r2imm) ? 1 : 0; },
+    {
+      STORE(builder.CreateZExt(
+                builder.CreateICmpSGE(LOAD_REG(I.r1), GEN_IMM(I.r2imm)),
+                builder.getInt64Ty()),
+            GEP2_64(I.rd));
+    })
+
+ISA(
+    0xc, INC_EQ, SKIP_3ARGS, READ_2REGS_R2IMM, WRITE_2REGS_R2IMM,
+    {
+      ++cpu->reg_file[r1];
+      cpu->reg_file[rd] = (cpu->reg_file[r1] == r2imm) ? 1 : 0;
+    },
+    {
+      STORE(builder.CreateAdd(LOAD_REG(I.r1), builder.getInt64(1)),
+            GEP2_64(I.r1));
+      STORE(builder.CreateZExt(
+                builder.CreateICmpEQ(LOAD_REG(I.r1), GEN_IMM(I.r2imm)),
+                builder.getInt64Ty()),
+            GEP2_64(I.rd));
+    })
+
+ISA(
+    0xd, BRANCH, SKIP_1ARG, READ_LABEL_TO_R2IMM, WRITE_LABEL_TO_R2IMM,
+    { cpu->next_pc = r2imm; },
+    {
+      builder.CreateBr(BBMap[I.r2imm]);
+      builder.SetInsertPoint(BBMap[++pc]);
+      continue;
+    })
+
+ISA(
+    0xe, BR_COND, SKIP_3ARGS, READ_REG_2LABELS, WRITE_REG_2LABELS,
     {
       if (cpu->reg_file[rd]) {
         cpu->next_pc = r2imm;
@@ -170,107 +248,7 @@ ISA(
     })
 
 ISA(
-    0x7, BRANCH, SKIP_1ARG, READ_LABEL_TO_R2IMM, WRITE_LABEL_TO_R2IMM,
-    { cpu->next_pc = r2imm; },
-    {
-      builder.CreateBr(BBMap[I.r2imm]);
-      builder.SetInsertPoint(BBMap[++pc]);
-      continue;
-    })
-
-ISA(
-    0x8, CMP_EQ, SKIP_3ARGS, READ_2REGS_R2IMM, WRITE_2REGS_R2IMM,
-    { cpu->reg_file[rd] = (cpu->reg_file[r1] == r2imm) ? 1 : 0; },
-    {
-      STORE(builder.CreateZExt(
-                builder.CreateICmpEQ(LOAD_REG(I.r1), GEN_IMM(I.r2imm)),
-                builder.getInt64Ty()),
-            GEP2_64(I.rd));
-    })
-
-ISA(
-    0x9, ANDi, SKIP_3ARGS, READ_2REGS_R2IMM, WRITE_2REGS_R2IMM,
-    { cpu->reg_file[rd] = cpu->reg_file[r1] & r2imm; },
-    {
-      STORE(builder.CreateAnd({LOAD_REG(I.r1), GEN_IMM(I.r2imm)}),
-            GEP2_64(I.rd));
-    })
-
-ISA(
-    0xa, SIM_RAND, SKIP_1ARG, READ_REG(rd), WRITE_REG(rd),
-    { cpu->reg_file[rd] = simRand(); },
-    {
-      STORE(
-          builder.CreateSExt(builder.CreateCall(simRand), builder.getInt64Ty()),
-          GEP2_64(I.rd));
-    })
-
-ISA(
-    0xb, SCREEN_FLUSH, {}, {}, {}, { simFlush(); },
-    { builder.CreateCall(simFlush); })
-
-ISA(
-    0xc, SCREEN_PUT_PIXEL, SKIP_3ARGS, READ_3REGS, WRITE_2REGS_R2IMM,
-    {
-      simPutPixel(cpu->reg_file[rd], cpu->reg_file[r1], cpu->reg_file[r2imm]);
-    },
-    {
-      builder.CreateCall(
-          simPutPixel,
-          {builder.CreateTrunc(LOAD_REG(I.rd), builder.getInt32Ty()),
-           builder.CreateTrunc(LOAD_REG(I.r1), builder.getInt32Ty()),
-           builder.CreateTrunc(LOAD_REG(I.r2imm), builder.getInt32Ty())});
-    })
-
-ISA(
-    0xd, SHL, SKIP_3ARGS, READ_2REGS_R2IMM, WRITE_2REGS_R2IMM,
-    { cpu->reg_file[rd] = cpu->reg_file[r1] << r2imm; },
-    {
-      STORE(builder.CreateShl(LOAD_REG(I.r1), GEN_IMM(I.r2imm)), GEP2_64(I.rd));
-    })
-
-ISA(
-    0xe, CMP_LT, SKIP_3ARGS, READ_2REGS_R2IMM, WRITE_2REGS_R2IMM,
-    { cpu->reg_file[rd] = (cpu->reg_file[r1] < r2imm) ? 1 : 0; },
-    {
-      STORE(builder.CreateZExt(
-                builder.CreateICmpSLT(LOAD_REG(I.r1), GEN_IMM(I.r2imm)),
-                builder.getInt64Ty()),
-            GEP2_64(I.rd));
-    })
-
-ISA(
-    0xf, DUMP_REG, SKIP_1ARG, READ_REG(rd), WRITE_REG(rd),
-    { dumpReg(rd, cpu->reg_file[rd]); },
-    { builder.CreateCall(dumpReg, {GEN_IMM(I.rd), LOAD_REG(I.rd)}); })
-
-ISA(0x10, DUMP_REGS, SKIP_2ARGS, READ_2REGS, WRITE_2REGS,
-    {
-      std::cout << "\n[START_DUMP_REGS]\n";
-      for (long long i = rd; i <= r1; ++i) {
-        dumpReg(i, cpu->reg_file[i]);
-      }
-      std::cout << "[END_DUMP_REGS]\n\n";
-    },
-    {})
-
-ISA(
-    0x11, INC_EQ, SKIP_3ARGS, READ_2REGS_R2IMM, WRITE_2REGS_R2IMM,
-    {
-      ++cpu->reg_file[r1];
-      cpu->reg_file[rd] = (cpu->reg_file[r1] == r2imm) ? 1 : 0;
-    },
-    {
-      STORE(builder.CreateAdd(LOAD_REG(I.r1), builder.getInt64(1)),
-            GEP2_64(I.r1));
-      STORE(builder.CreateZExt(
-                builder.CreateICmpEQ(LOAD_REG(I.r1), GEN_IMM(I.r2imm)),
-                builder.getInt64Ty()),
-            GEP2_64(I.rd));
-    })
-
-ISA(
-    0x12, ALGR, SKIP_1ARG, READ_REG(rd), WRITE_REG(rd),
+    0xf, ALGR, SKIP_1ARG, READ_REG(rd), WRITE_REG(rd),
     {
       cpu->reg_file[rd] =
           reinterpret_cast<uint64_t>(new uint32_t[SIM_X_SIZE * SIM_Y_SIZE]);
@@ -283,7 +261,7 @@ ISA(
     })
 
 ISA(
-    0x13, MEMSET, SKIP_1ARG, READ_REG(rd), WRITE_REG(rd),
+    0x10, MEMSET, SKIP_1ARG, READ_REG(rd), WRITE_REG(rd),
     {
       ::memset((void *)cpu->reg_file[rd], 0,
                SIM_X_SIZE * SIM_Y_SIZE * I32_SIZE);
@@ -295,7 +273,7 @@ ISA(
     })
 
 ISA(
-    0x14, MEMCPY, SKIP_2ARGS, READ_2REGS, WRITE_2REGS,
+    0x11, MEMCPY, SKIP_2ARGS, READ_2REGS, WRITE_2REGS,
     {
       ::memcpy((void *)cpu->reg_file[rd], (void *)cpu->reg_file[r1],
                SIM_X_SIZE * SIM_Y_SIZE * I32_SIZE);
@@ -307,35 +285,7 @@ ISA(
     })
 
 ISA(
-    0x15, DUMP_GRID, SKIP_1ARG, READ_REG(rd), WRITE_REG(rd),
-    { dumpGrid((int *)cpu->reg_file[rd]); },
-    { builder.CreateCall(dumpGrid, {LOAD_PTR(I.rd)}); })
-
-ISA(0x16, LT_START, SKIP_1ARG, READ_REG(rd), WRITE_REG(rd), {},
-    { builder.CreateLifetimeStart(LOAD_PTR(I.rd)); })
-
-ISA(0x17, LT_END, SKIP_1ARG, READ_REG(rd), WRITE_REG(rd), {},
-    { builder.CreateLifetimeEnd(LOAD_PTR(I.rd)); })
-
-ISA(
-    0x18, SET_CELL, SKIP_4ARGS, READ_4REGS, WRITE_4REGS,
-    {
-      ((uint32_t *)cpu->reg_file[rd])[SIM_Y_SIZE * cpu->reg_file[r1] +
-                                      cpu->reg_file[r2imm]] =
-          cpu->reg_file[r3imm];
-    },
-    {
-      ArrayType *gridTy = ArrayType::get(
-          ArrayType::get(IntegerType::get(context, 32), SIM_Y_SIZE),
-          SIM_X_SIZE);
-      STORE(builder.CreateTrunc(LOAD_REG(I.r3imm), builder.getInt32Ty()),
-            builder.CreateInBoundsGEP(
-                gridTy, LOAD_PTR(I.rd),
-                {builder.getInt64(0), LOAD_REG(I.r1), LOAD_REG(I.r2imm)}));
-    })
-
-ISA(
-    0x19, GET_CELL, SKIP_4ARGS, READ_4REGS, WRITE_4REGS,
+    0x12, GET_CELL, SKIP_4ARGS, READ_4REGS, WRITE_4REGS,
     {
       cpu->reg_file[r3imm] =
           ((uint32_t *)cpu->reg_file[rd])[SIM_Y_SIZE * cpu->reg_file[r1] +
@@ -356,27 +306,66 @@ ISA(
     })
 
 ISA(
-    0x1a, AND, SKIP_3ARGS, READ_3REGS, WRITE_3REGS,
-    { cpu->reg_file[rd] = cpu->reg_file[r1] & cpu->reg_file[r2imm]; },
+    0x13, SET_CELL, SKIP_4ARGS, READ_4REGS, WRITE_4REGS,
     {
-      STORE(builder.CreateAnd({LOAD_REG(I.r1), LOAD_REG(I.r2imm)}),
-            GEP2_64(I.rd));
+      ((uint32_t *)cpu->reg_file[rd])[SIM_Y_SIZE * cpu->reg_file[r1] +
+                                      cpu->reg_file[r2imm]] =
+          cpu->reg_file[r3imm];
+    },
+    {
+      ArrayType *gridTy = ArrayType::get(
+          ArrayType::get(IntegerType::get(context, 32), SIM_Y_SIZE),
+          SIM_X_SIZE);
+      STORE(builder.CreateTrunc(LOAD_REG(I.r3imm), builder.getInt32Ty()),
+            builder.CreateInBoundsGEP(
+                gridTy, LOAD_PTR(I.rd),
+                {builder.getInt64(0), LOAD_REG(I.r1), LOAD_REG(I.r2imm)}));
     })
 
 ISA(
-    0x1b, OR, SKIP_3ARGS, READ_3REGS, WRITE_3REGS,
-    { cpu->reg_file[rd] = cpu->reg_file[r1] | cpu->reg_file[r2imm]; },
+    0x14, SCREEN_PUT_PIXEL, SKIP_3ARGS, READ_3REGS, WRITE_2REGS_R2IMM,
     {
-      STORE(builder.CreateOr({LOAD_REG(I.r1), LOAD_REG(I.r2imm)}),
-            GEP2_64(I.rd));
+      simPutPixel(cpu->reg_file[rd], cpu->reg_file[r1], cpu->reg_file[r2imm]);
+    },
+    {
+      builder.CreateCall(
+          simPutPixel,
+          {builder.CreateTrunc(LOAD_REG(I.rd), builder.getInt32Ty()),
+           builder.CreateTrunc(LOAD_REG(I.r1), builder.getInt32Ty()),
+           builder.CreateTrunc(LOAD_REG(I.r2imm), builder.getInt32Ty())});
     })
 
 ISA(
-    0x1c, CMP_GE, SKIP_3ARGS, READ_2REGS_R2IMM, WRITE_2REGS_R2IMM,
-    { cpu->reg_file[rd] = (cpu->reg_file[r1] >= r2imm) ? 1 : 0; },
+    0x15, SCREEN_FLUSH, {}, {}, {}, { simFlush(); },
+    { builder.CreateCall(simFlush); })
+
+ISA(
+    0x16, SIM_RAND, SKIP_1ARG, READ_REG(rd), WRITE_REG(rd),
+    { cpu->reg_file[rd] = simRand(); },
     {
-      STORE(builder.CreateZExt(
-                builder.CreateICmpSGE(LOAD_REG(I.r1), GEN_IMM(I.r2imm)),
-                builder.getInt64Ty()),
-            GEP2_64(I.rd));
+      STORE(
+          builder.CreateSExt(builder.CreateCall(simRand), builder.getInt64Ty()),
+          GEP2_64(I.rd));
     })
+
+ISA(
+    0x17, DUMP_REG, SKIP_1ARG, READ_REG(rd), WRITE_REG(rd),
+    { dumpReg(rd, cpu->reg_file[rd]); },
+    { builder.CreateCall(dumpReg, {GEN_IMM(I.rd), LOAD_REG(I.rd)}); })
+
+ISA(0x18, DUMP_REGS, SKIP_2ARGS, READ_2REGS, WRITE_2REGS,
+    {
+      std::cout << "\n[START_DUMP_REGS]\n";
+      for (long long i = rd; i <= r1; ++i) {
+        dumpReg(i, cpu->reg_file[i]);
+      }
+      std::cout << "[END_DUMP_REGS]\n\n";
+    },
+    {})
+
+ISA(
+    0x19, DUMP_GRID, SKIP_1ARG, READ_REG(rd), WRITE_REG(rd),
+    { dumpGrid((int *)cpu->reg_file[rd]); },
+    { builder.CreateCall(dumpGrid, {LOAD_PTR(I.rd)}); })
+
+ISA(0x1a, EXIT, {}, {}, {}, { cpu->run = false; }, { builder.CreateRetVoid(); })

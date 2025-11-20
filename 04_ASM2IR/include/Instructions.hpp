@@ -19,7 +19,6 @@ struct Instruction final {
   int64_t r1;
   int64_t r2imm;
   int64_t r3imm;
-  // long long r4Imm;
 };
 
 struct InstructionInfo final {

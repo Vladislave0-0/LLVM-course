@@ -1,12 +1,10 @@
 #include "../include/AsmParser.hpp"
-#include "../include/Instructions.hpp"
 
 #include <algorithm>
 #include <cctype>
 #include <fstream>
 #include <iostream>
 #include <sstream>
-#include <vector>
 
 namespace asm2ir {
 
