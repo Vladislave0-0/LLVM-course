@@ -17,7 +17,7 @@ antlr4, libantlr4-runtime-dev
 Поэтому в директории `./tools/` находятся две версии `antlr4`: `antlr-4.10.1` и `antlr-4.13.1`. Ориентироваться будем на последнюю версию `4.13.1`.
 
 Установка `antlr4-runtime v4.13.1`:
-```bash
+```powershell
 git clone https://github.com/antlr/antlr4.git
 cd antlr4
 git checkout 4.13.1
@@ -31,12 +31,16 @@ cd ../../../../
 ```
 
 ## Генерация парсера и компиляция
-В корне проекта есть скрипт `run.sh`, который опционально генерирует парсер и компилирует проект:
+В корне проекта есть скрипт `run.sh`, который опционально генерирует парсер и компилирует проект. Для начала выполним:
+```powershell
+cmake -S ./ -B build/ -DCMAKE_BUILD_TYPE=Release
+```
+
 ```bash
 chmod +x run.sh
 ```
 
-```bash
+```powershell
 Usage: ./run.sh [MODE]
 
 MODE options (optional):
