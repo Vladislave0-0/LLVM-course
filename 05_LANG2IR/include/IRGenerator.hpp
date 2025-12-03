@@ -1,15 +1,18 @@
 #pragma once
 
+#include "../generated/langBaseVisitor.h"
+#include "../generated/langParser.h"
+
 #include <llvm/IR/IRBuilder.h>
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Module.h>
-#include <iostream>
 
 namespace lang2ir {
 
 using namespace llvm;
+using namespace antlr4;
 
-class IRGenerator final {
+class IRGenerator final : public langBaseVisitor {
   const std::string_view moduleName = "LANG2IR";
 
   LLVMContext context;
@@ -34,9 +37,18 @@ public:
 
   ~IRGenerator() = default;
 
-  void buildIR();
-  bool verifyModule_();
+  void buildIR(langParser &parser);
   void execute();
+
+public:
+  // Программа
+  antlrcpp::Any visitProg(langParser::ProgContext *ctx) override;
+
+  // Сложение двух чисел
+  antlrcpp::Any visitAdd(langParser::AddContext *ctx) override;
+
+  // Одно число
+  antlrcpp::Any visitSingleNum(langParser::SingleNumContext *ctx) override;
 };
 
 } // namespace lang2ir

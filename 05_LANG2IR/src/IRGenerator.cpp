@@ -2,7 +2,6 @@
 #include <llvm-18/llvm/ExecutionEngine/ExecutionEngine.h>
 #include <llvm-18/llvm/ExecutionEngine/GenericValue.h>
 #include <llvm-18/llvm/Transforms/Utils/Cloning.h>
-#include <llvm/IR/Verifier.h>
 
 namespace lang2ir {
 
@@ -14,41 +13,20 @@ void simPutPixel(int x, int y, int argb);
 void simFlush();
 }
 
-llvm::Function *IRGenerator::printSimPutPixel() {
-  auto *voidTy = llvm::Type::getVoidTy(context);
-  auto *i32 = llvm::Type::getInt32Ty(context);
-  auto *funcTy = llvm::FunctionType::get(voidTy, {i32, i32, i32}, false);
+void IRGenerator::buildIR(langParser &parser) {
+  FunctionType *FuncType = FunctionType::get(Type::getVoidTy(context), false);
+  Function *AppFunc =
+      Function::Create(FuncType, Function::ExternalLinkage, appName, *IRModule);
 
-  return llvm::Function::Create(funcTy, llvm::GlobalValue::ExternalLinkage,
-                                simPutPixelName, *IRModule);
-}
+  printSimFlush();
+  printSimPutPixel();
+  printSimRand();
 
-llvm::Function *IRGenerator::printSimFlush() {
-  auto *voidTy = llvm::Type::getVoidTy(context);
-  auto *funcTy = llvm::FunctionType::get(voidTy, {}, false);
+  auto tree = parser.prog();
+  int result = std::any_cast<int>(this->visit(tree));
+  std::cout << result << std::endl;
 
-  return llvm::Function::Create(funcTy, llvm::GlobalValue::ExternalLinkage,
-                                simFlushName, *IRModule);
-}
-
-llvm::Function *IRGenerator::printSimRand() {
-  auto *i32 = llvm::Type::getInt32Ty(context);
-  auto *funcTy = llvm::FunctionType::get(i32, {}, false);
-
-  return llvm::Function::Create(funcTy, llvm::GlobalValue::ExternalLinkage,
-                                simRandName, *IRModule);
-}
-
-void IRGenerator::buildIR() { return; }
-
-bool IRGenerator::verifyModule_() {
-  bool status = verifyModule(*IRModule, &outs());
-
-  outs() << "[VERIFICATION STATUS] ";
-  if (!status)
-    return outs() << "Passed\n\n", true;
-
-  return outs() << "Failed\n\n", false;
+  return;
 }
 
 void IRGenerator::execute() {
@@ -83,6 +61,45 @@ void IRGenerator::execute() {
   ee->runFunction(app, noArgs);
 
   simExit();
+}
+
+llvm::Function *IRGenerator::printSimPutPixel() {
+  auto *voidTy = llvm::Type::getVoidTy(context);
+  auto *i32 = llvm::Type::getInt32Ty(context);
+  auto *funcTy = llvm::FunctionType::get(voidTy, {i32, i32, i32}, false);
+
+  return llvm::Function::Create(funcTy, llvm::GlobalValue::ExternalLinkage,
+                                simPutPixelName, *IRModule);
+}
+
+llvm::Function *IRGenerator::printSimFlush() {
+  auto *voidTy = llvm::Type::getVoidTy(context);
+  auto *funcTy = llvm::FunctionType::get(voidTy, {}, false);
+
+  return llvm::Function::Create(funcTy, llvm::GlobalValue::ExternalLinkage,
+                                simFlushName, *IRModule);
+}
+
+llvm::Function *IRGenerator::printSimRand() {
+  auto *i32 = llvm::Type::getInt32Ty(context);
+  auto *funcTy = llvm::FunctionType::get(i32, {}, false);
+
+  return llvm::Function::Create(funcTy, llvm::GlobalValue::ExternalLinkage,
+                                simRandName, *IRModule);
+}
+
+antlrcpp::Any IRGenerator::visitProg(langParser::ProgContext *ctx) {
+  return visit(ctx->expr());
+}
+
+antlrcpp::Any IRGenerator::visitAdd(langParser::AddContext *ctx) {
+  int left = std::stoi(ctx->left->getText());
+  int right = std::stoi(ctx->right->getText());
+  return left + right;
+}
+
+antlrcpp::Any IRGenerator::visitSingleNum(langParser::SingleNumContext *ctx) {
+  return std::stoi(ctx->NUM()->getText());
 }
 
 } // namespace lang2ir
