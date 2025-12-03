@@ -2,15 +2,16 @@
 #include <llvm-18/llvm/ExecutionEngine/ExecutionEngine.h>
 #include <llvm-18/llvm/ExecutionEngine/GenericValue.h>
 #include <llvm-18/llvm/Transforms/Utils/Cloning.h>
+#include <llvm/IR/Verifier.h>
 
 namespace lang2ir {
 
 extern "C" {
 void simInit();
 void simExit();
-void simFlush();
-void simPutPixel(int, int, int);
 int simRand();
+void simPutPixel(int x, int y, int argb);
+void simFlush();
 }
 
 llvm::Function *IRGenerator::printSimPutPixel() {
