@@ -56,16 +56,19 @@ fi
 # Компиляция
 if [[ "$MODE" == "--compile" || "$MODE" == "--all" ]]; then
     echo "Compiling with ANTLR 4.13.1..."
+
+    cmake --build ./build
     
-    clang++                                         \
-      src/*.cpp src/*.c generated/*.cpp             \
-      -I /usr/local/include/antlr4-runtime          \
-      -I generated                                  \
-      -L /usr/local/lib                             \
-      -lantlr4-runtime                              \
-      $(llvm-config --cppflags --ldflags --libs)    \
-      -std=c++17                                    \
-      -o lang2ir
+    # clang++                                         \
+    #   src/*.cpp src/*.c generated/*.cpp             \
+    #   -I /usr/local/include/antlr4-runtime          \
+    #   -I generated                                  \
+    #   -L /usr/local/lib                             \
+    #   -lantlr4-runtime                              \
+    #   $(llvm-config --cppflags --ldflags --libs)    \
+    #   -std=c++17                                    \
+    #   -o lang2ir
     
+    echo ""
     echo "Compilation successful. Executable: ./lang2ir"
 fi
