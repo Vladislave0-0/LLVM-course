@@ -1,0 +1,17 @@
+func foo() {
+  return 42;
+}
+
+func app(x, y, z) {
+  var a = 1;
+  var b = -x;
+  var c = a == b;
+  var d = a + b * c;
+  var e = (a + b) * c;
+
+  array arr[5][10];
+  arr[1][1] = 42;
+
+  var f = e < arr[1][1];
+  var g = foo();
+}

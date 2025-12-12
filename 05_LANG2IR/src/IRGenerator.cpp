@@ -13,21 +13,22 @@ void simPutPixel(int x, int y, int argb);
 void simFlush();
 }
 
-void IRGenerator::buildIR(langParser &parser) {
-  FunctionType *FuncType = FunctionType::get(Type::getVoidTy(context), false);
-  Function *AppFunc =
-      Function::Create(FuncType, Function::ExternalLinkage, appName, *IRModule);
+// void IRGenerator::buildIR(langParser &parser) {
+  // FunctionType *FuncType = FunctionType::get(Type::getVoidTy(context),
+  // false); Function *AppFunc =
+  //     Function::Create(FuncType, Function::ExternalLinkage, appName,
+  //     *IRModule);
 
-  printSimFlush();
-  printSimPutPixel();
-  printSimRand();
+  // printSimFlush();
+  // printSimPutPixel();
+  // printSimRand();
 
-  auto tree = parser.prog();
-  int result = std::any_cast<int>(this->visit(tree));
-  std::cout << result << std::endl;
+  // auto tree = parser.prog();
+  // int result = std::any_cast<int>(this->visit(tree));
+  // std::cout << result << std::endl;
 
-  return;
-}
+//   return;
+// }
 
 void IRGenerator::execute() {
   std::unique_ptr<Module> execModule = CloneModule(*IRModule);
@@ -88,18 +89,23 @@ llvm::Function *IRGenerator::printSimRand() {
                                 simRandName, *IRModule);
 }
 
-antlrcpp::Any IRGenerator::visitProg(langParser::ProgContext *ctx) {
-  return visit(ctx->expr());
-}
+// antlrcpp::Any IRGenerator::visitProgram(langParser::ProgrammContext *ctx) {
+//   printSimFlush();
+//   printSimPutPixel();
+//   printSimRand();
 
-antlrcpp::Any IRGenerator::visitAdd(langParser::AddContext *ctx) {
-  int left = std::stoi(ctx->left->getText());
-  int right = std::stoi(ctx->right->getText());
-  return left + right;
-}
+//   visitStatements(ctx->funcInit());
 
-antlrcpp::Any IRGenerator::visitSingleNum(langParser::SingleNumContext *ctx) {
-  return std::stoi(ctx->NUM()->getText());
-}
+//   visitFuncInit(langParser::FuncInitContext *ctx)
+
+//   return nullptr;
+// }
+
+//   antlrcpp::Any visitStatements(langParser::StatementsContext *ctx) {
+//     for (auto statement: ctx->statement()) {
+//       visitStatement(statement);
+//     }
+//     return nullptr;
+//   }
 
 } // namespace lang2ir

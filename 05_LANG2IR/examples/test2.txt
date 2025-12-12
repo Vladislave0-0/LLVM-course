@@ -1,0 +1,6 @@
+var variable = 1;
+
+func app() {
+
+}
+

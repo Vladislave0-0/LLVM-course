@@ -41,14 +41,11 @@ public:
   void execute();
 
 public:
-  // Программа
-  antlrcpp::Any visitProg(langParser::ProgContext *ctx) override;
+  // antlrcpp::Any visitProgram(langParser::ProgramContext *ctx) override;
+  // antlrcpp::Any visitStatements(langParser::StatementsContext *ctx) {
 
-  // Сложение двух чисел
-  antlrcpp::Any visitAdd(langParser::AddContext *ctx) override;
 
-  // Одно число
-  antlrcpp::Any visitSingleNum(langParser::SingleNumContext *ctx) override;
+
 };
 
 } // namespace lang2ir

@@ -1,7 +1,10 @@
 ; ModuleID = 'LANG2IR'
 source_filename = "LANG2IR"
 
-declare void @app()
+define i32 @main() {
+entry:
+  ret i32 4
+}
 
 declare void @simFlush()
 
