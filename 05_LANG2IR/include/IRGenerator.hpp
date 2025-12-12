@@ -42,6 +42,7 @@ public:
 
 public:
   // antlrcpp::Any visitProgram(langParser::ProgramContext *ctx) override;
+  // antlrcpp::Any visitFuncInit(langParser::FuncInitContext *ctx) override;
   // antlrcpp::Any visitStatements(langParser::StatementsContext *ctx) {
 
 

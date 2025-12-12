@@ -14,18 +14,18 @@ void simFlush();
 }
 
 // void IRGenerator::buildIR(langParser &parser) {
-  // FunctionType *FuncType = FunctionType::get(Type::getVoidTy(context),
-  // false); Function *AppFunc =
-  //     Function::Create(FuncType, Function::ExternalLinkage, appName,
-  //     *IRModule);
+// FunctionType *FuncType = FunctionType::get(Type::getVoidTy(context),
+// false); Function *AppFunc =
+//     Function::Create(FuncType, Function::ExternalLinkage, appName,
+//     *IRModule);
 
-  // printSimFlush();
-  // printSimPutPixel();
-  // printSimRand();
+// printSimFlush();
+// printSimPutPixel();
+// printSimRand();
 
-  // auto tree = parser.prog();
-  // int result = std::any_cast<int>(this->visit(tree));
-  // std::cout << result << std::endl;
+// auto tree = parser.prog();
+// int result = std::any_cast<int>(this->visit(tree));
+// std::cout << result << std::endl;
 
 //   return;
 // }
@@ -89,16 +89,19 @@ llvm::Function *IRGenerator::printSimRand() {
                                 simRandName, *IRModule);
 }
 
-// antlrcpp::Any IRGenerator::visitProgram(langParser::ProgrammContext *ctx) {
+// antlrcpp::Any IRGenerator::visitProgram(langParser::ProgramContext *ctx) {
 //   printSimFlush();
 //   printSimPutPixel();
 //   printSimRand();
 
-//   visitStatements(ctx->funcInit());
-
-//   visitFuncInit(langParser::FuncInitContext *ctx)
+//   for(auto func : ctx->funcInit())
+//     visitFuncInit(func);
 
 //   return nullptr;
+// }
+
+// antlrcpp::Any visitFuncInit(langParser::FuncInitContext *ctx) {
+  
 // }
 
 //   antlrcpp::Any visitStatements(langParser::StatementsContext *ctx) {

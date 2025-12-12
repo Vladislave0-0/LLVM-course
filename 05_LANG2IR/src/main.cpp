@@ -35,7 +35,7 @@ int main(int argc, char **argv) {
   return 0;
 
   IRGenerator generator{};
-  generator.visitProgram(parser.program());
+  // generator.visitProgram(parser.program());
 
 
 
