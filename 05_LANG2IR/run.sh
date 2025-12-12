@@ -70,5 +70,5 @@ if [[ "$MODE" == "--compile" || "$MODE" == "--all" ]]; then
     #   -o lang2ir
     
     echo ""
-    echo "Compilation successful. Executable: ./lang2ir"
+    echo "Compilation successful. Executable: ./build/lang2ir"
 fi
