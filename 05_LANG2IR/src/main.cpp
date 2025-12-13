@@ -1,6 +1,5 @@
 #include "../generated/langLexer.h"
 #include <../include/IRGenerator.hpp>
-// #include <../include/visitor.hpp>
 #include <CLI/CLI.hpp>
 #include <fstream>
 #include <iostream>
@@ -30,35 +29,23 @@ int main(int argc, char **argv) {
   CommonTokenStream tokens(&lexer);
   langParser parser(&tokens);
 
-  // Display the parse tree
-  outs() << parser.program()->toStringTree() << '\n';
-  return 0;
-
   IRGenerator generator{};
-  // generator.visitProgram(parser.program());
+  generator.visitProgram(parser.program());
 
+  if (llvm::verifyModule(*generator.getIRModule(), &outs())) {
+    std::cerr << "[Verification] Failed." << std::endl;
+    return 1;
+  }
 
+  std::error_code EC;
+  llvm::raw_fd_ostream IRFile(outputFile, EC);
+  if (EC) {
+    std::cerr << "Error opening file for IR output: " << EC.message()
+              << std::endl;
+    return 1;
+  }
 
+  generator.getIRModule()->print(IRFile, nullptr);
 
-
-
-  
-
-  // generator.getIRModule()->dump();
-  // if (llvm::verifyModule(*generator.getIRModule(), &outs())) {
-  //   std::cout << "[Verification] Failed." << std::endl;
-  //   return 1;
-  // }
-
-  // std::error_code EC;
-  // llvm::raw_fd_ostream IRFile(outputFile, EC);
-  // if (EC) {
-  //   std::cerr << "Error opening file for IR output: " << EC.message()
-  //             << std::endl;
-  //   return 1;
-  // }
-
-  // generator.getIRModule()->print(IRFile, nullptr);
-
-  // generator.execute();
+  generator.execute();
 }
