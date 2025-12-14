@@ -1,0 +1,37 @@
+// Function `app` draws grid.
+
+func app() {
+  var SIM_X_SIZE = 512;
+  var SIM_Y_SIZE = 512;
+  var GRID_CLR = 6908265;
+
+  var outer_x = 0;
+  while (outer_x < 32) {
+    var line_x = outer_x * 16;
+    
+    var inner_y = 0;
+    while (inner_y < SIM_X_SIZE) {
+      simPutPixel(line_x, inner_y, GRID_CLR);
+      inner_y = inner_y + 1;
+    }
+    
+    outer_x = outer_x + 1;
+  }
+  
+  var outer_y = 0;
+  while (outer_y < 32) {
+    var line_y = outer_y * 16;
+    
+    var inner_x = 0;
+    while (inner_x < SIM_Y_SIZE) {
+      simPutPixel(inner_x, line_y, GRID_CLR);
+      inner_x = inner_x + 1;
+    }
+    
+    outer_y = outer_y + 1;
+  }
+
+
+  simFlush();
+  return 0;
+}

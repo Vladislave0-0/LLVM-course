@@ -1,0 +1,197 @@
+func validCell(x, y) {
+  if (x < 0) { return 0; }
+  if (y < 0) { return 0; }
+  if (x >= 32) { return 0; }
+  if (y >= 32) { return 0; }
+
+  return 1;
+}
+
+func drawLiveCell(grid_x, grid_y, color) {
+  if (validCell(grid_x, grid_y) == 0) {
+    return 0;
+  }
+  
+  var start_x = grid_x * 16;
+  var start_y = grid_y * 16;
+  
+  var y = 0;
+  while (y < 16) {
+    var x = 0;
+
+    while (x < 16) {
+      simPutPixel(start_x + x, start_y + y, color);
+      x = x + 1;
+    }
+
+    y = y + 1;
+  }
+  
+  return 0;
+}
+
+func drawGrid() {
+  var SIM_X_SIZE = 512;
+  var SIM_Y_SIZE = 512;
+  var GRID_CLR = 6908265;
+
+  var outer_x = 0;
+  while (outer_x < 32) {
+    var line_x = outer_x * 16;
+    
+    var inner_y = 0;
+    while (inner_y < SIM_X_SIZE) {
+      simPutPixel(line_x, inner_y, GRID_CLR);
+      inner_y = inner_y + 1;
+    }
+    
+    outer_x = outer_x + 1;
+  }
+  
+  var outer_y = 0;
+  while (outer_y < 32) {
+    var line_y = outer_y * 16;
+    
+    var inner_x = 0;
+    while (inner_x < SIM_Y_SIZE) {
+      simPutPixel(inner_x, line_y, GRID_CLR);
+      inner_x = inner_x + 1;
+    }
+    
+    outer_y = outer_y + 1;
+  }
+
+  return 0;
+}
+
+func app() {
+  var SIM_X_SIZE = 512;
+  var SIM_Y_SIZE = 512;
+  var ALIVE_CLR = 6591981;
+  var DEAD_CLR = -1;
+
+  array grid[32][32];
+  array tmp_grid[32][32];
+    
+  // Инициализация grid случайными значениями
+  var init_i = 0;
+  while (init_i < 32) {
+    var init_j = 0;
+
+    while (init_j < 32) {
+      grid[init_i][init_j] = simRand() % 2;
+      init_j = init_j + 1;
+    }
+
+    init_i = init_i + 1;
+  }
+  
+  var step = 0;
+  while (step < 10000) {
+  // Строим следующее поколение
+    var gen_i = 0;
+    while (gen_i < 32) {
+      var gen_j = 0;
+      while (gen_j < 32) {
+        var neighbors = 0;
+        var dx = -1;
+        
+        while (dx <= 1) {
+          var dy = -1;
+          while (dy <= 1) {
+            // Пропускаем саму клетку
+            var skip = 0;
+            if (dx == 0) {
+              if (dy == 0) {
+                skip = 1;
+              }
+            }
+            
+            if (skip == 0) {
+              var nx = gen_j + dx;
+              var ny = gen_i + dy;
+              
+              // Учтём, что поле тороидальное
+              nx = (nx + 32) % 32;
+              ny = (ny + 32) % 32;
+              
+              neighbors = neighbors + grid[ny][nx];
+            }
+
+            dy = dy + 1;
+          }
+
+          dx = dx + 1;
+        }
+        
+        var cell = grid[gen_i][gen_j];
+        var new_cell = 0;
+        
+        if (cell == 1) {
+            if (neighbors == 2) {
+              new_cell = 1;
+            }
+            if (neighbors == 3) {
+              new_cell = 1;
+            }
+        } else {
+          if (neighbors == 3) {
+            new_cell = 1;
+          }
+        }
+        
+        tmp_grid[gen_i][gen_j] = new_cell;
+        gen_j = gen_j + 1;
+      }
+      gen_i = gen_i + 1;
+    }
+    
+    // Копируем tmp_grid в grid
+    var copy_i = 0;
+    while (copy_i < 32) {
+      var copy_j = 0;
+
+      while (copy_j < 32) {
+        grid[copy_i][copy_j] = tmp_grid[copy_i][copy_j];
+        copy_j = copy_j + 1;
+      }
+
+      copy_i = copy_i + 1;
+    }
+
+    // Очищаем экран
+    var clear_i = 0;
+    while (clear_i < SIM_Y_SIZE) {
+      var clear_j = 0;
+
+      while (clear_j < SIM_X_SIZE) {
+        simPutPixel(clear_j, clear_i, DEAD_CLR);
+        clear_j = clear_j + 1;
+      }
+
+      clear_i = clear_i + 1;
+    }
+    
+    // Отрисовываем живые клетки
+    var draw_i = 0;
+    while (draw_i < 32) {
+      var draw_j = 0;
+
+      while (draw_j < 32) {
+        if (grid[draw_i][draw_j] == 1) {
+          drawLiveCell(draw_j, draw_i, ALIVE_CLR);
+        }
+
+        draw_j = draw_j + 1;
+      }
+
+      draw_i = draw_i + 1;
+    }
+    
+    drawGrid();
+    simFlush();
+    step = step + 1;
+  }
+  
+  return 0;
+}

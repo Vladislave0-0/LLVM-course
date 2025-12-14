@@ -1,5 +1,5 @@
 // First working program with graphics.
-// The function `app` draws a red square
+// Function `app` draws a red square
 
 func app() {
   var start_x = 100;
@@ -21,6 +21,5 @@ func app() {
   }
   
   simFlush();
-  
   return 0;
 }
