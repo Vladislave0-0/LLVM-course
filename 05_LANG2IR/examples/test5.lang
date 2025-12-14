@@ -2,6 +2,8 @@
 
 func app() {
   var variable = 1;
+  var x1 = 1;
+  var x_2 = 1;
 
   return 0;
 }
