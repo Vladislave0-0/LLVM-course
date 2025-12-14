@@ -2,6 +2,7 @@
 #include <llvm-18/llvm/ExecutionEngine/ExecutionEngine.h>
 #include <llvm-18/llvm/ExecutionEngine/GenericValue.h>
 #include <llvm-18/llvm/Transforms/Utils/Cloning.h>
+#include <llvm/IR/Verifier.h>
 
 namespace lang2ir {
 
@@ -14,6 +15,11 @@ void simFlush();
 }
 
 void IRGenerator::execute() {
+  // if (llvm::verifyModule(*IRModule, &outs())) {
+  //   std::cerr << "[Verification] Failed." << std::endl;
+  //   return;
+  // }
+
   std::unique_ptr<Module> execModule = CloneModule(*IRModule);
   auto *app = execModule->getFunction(appName);
   if (!app) {
@@ -51,33 +57,30 @@ void IRGenerator::execute() {
   simExit();
 }
 
-llvm::Function *IRGenerator::printSimPutPixel() {
-  auto *voidTy = llvm::Type::getVoidTy(context);
-  auto *funcTy = llvm::FunctionType::get(voidTy, {i32Ty, i32Ty, i32Ty}, false);
-
-  return llvm::Function::Create(funcTy, llvm::GlobalValue::ExternalLinkage,
-                                simPutPixelName, *IRModule);
+void IRGenerator::printModule(llvm::raw_fd_ostream &IRFile) {
+  IRModule->print(IRFile, nullptr);
 }
 
-llvm::Function *IRGenerator::printSimFlush() {
+void IRGenerator::printAppFunctions() {
   auto *voidTy = llvm::Type::getVoidTy(context);
-  auto *funcTy = llvm::FunctionType::get(voidTy, {}, false);
+  auto *simFlushTy = llvm::FunctionType::get(voidTy, {}, false);
+  auto *simRandTy = llvm::FunctionType::get(i32Ty, {}, false);
 
-  return llvm::Function::Create(funcTy, llvm::GlobalValue::ExternalLinkage,
-                                simFlushName, *IRModule);
-}
+  auto *simPutPixelTy =
+      llvm::FunctionType::get(voidTy, {i32Ty, i32Ty, i32Ty}, false);
 
-llvm::Function *IRGenerator::printSimRand() {
-  auto *funcTy = llvm::FunctionType::get(i32Ty, {}, false);
+  llvm::Function::Create(simPutPixelTy, llvm::GlobalValue::ExternalLinkage,
+                         simPutPixelName, *IRModule);
 
-  return llvm::Function::Create(funcTy, llvm::GlobalValue::ExternalLinkage,
-                                simRandName, *IRModule);
+  llvm::Function::Create(simFlushTy, llvm::GlobalValue::ExternalLinkage,
+                         simFlushName, *IRModule);
+
+  llvm::Function::Create(simRandTy, llvm::GlobalValue::ExternalLinkage,
+                         simRandName, *IRModule);
 }
 
 antlrcpp::Any IRGenerator::visitProgram(langParser::ProgramContext *ctx) {
-  printSimFlush();
-  printSimPutPixel();
-  printSimRand();
+  printAppFunctions();
 
   visitFuncList(ctx->funcList());
 

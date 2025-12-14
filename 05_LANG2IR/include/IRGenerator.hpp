@@ -22,19 +22,17 @@ class IRGenerator final : public langBaseVisitor {
   std::vector<std::map<std::string, Value *>> varList;
   std::vector<std::map<std::string, std::pair<Value *, ArrayType *>>> arrList;
   std::vector<std::string> funcList;
-
   Function *currFunc;
+  Type *i32Ty;
 
-  Function *printSimPutPixel();
-  Function *printSimFlush();
-  Function *printSimRand();
+  // Function *printSimPutPixel();
+  // Function *printSimFlush();
+  // Function *printSimRand();
 
   const std::string_view appName = "app";
   const std::string_view simPutPixelName = "simPutPixel";
   const std::string_view simFlushName = "simFlush";
   const std::string_view simRandName = "simRand";
-
-  Type *i32Ty;
 
 public:
   IRGenerator()
@@ -43,15 +41,16 @@ public:
     i32Ty = llvm::Type::getInt32Ty(context);
   }
 
-  std::unique_ptr<Module> &getIRModule() { return IRModule; }
-
   ~IRGenerator() = default;
 
-  void buildIR(langParser &parser);
+  std::unique_ptr<Module> &getIRModule() { return IRModule; }
+  void printModule(llvm::raw_fd_ostream &IRFile);
   void execute();
-
-public:
   antlrcpp::Any visitProgram(langParser::ProgramContext *ctx) override;
+
+private:
+  void printAppFunctions();
+
   antlrcpp::Any visitFuncList(langParser::FuncListContext *ctx) override;
   antlrcpp::Any visitFuncInit(langParser::FuncInitContext *ctx) override;
   antlrcpp::Any visitStatements(langParser::StatementsContext *ctx) override;

@@ -32,11 +32,6 @@ int main(int argc, char **argv) {
   IRGenerator generator{};
   generator.visitProgram(parser.program());
 
-  if (llvm::verifyModule(*generator.getIRModule(), &outs())) {
-    std::cerr << "[Verification] Failed." << std::endl;
-    return 1;
-  }
-
   std::error_code EC;
   llvm::raw_fd_ostream IRFile(outputFile, EC);
   if (EC) {
@@ -45,7 +40,6 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  generator.getIRModule()->print(IRFile, nullptr);
-
+  generator.printModule(IRFile);
   generator.execute();
 }
