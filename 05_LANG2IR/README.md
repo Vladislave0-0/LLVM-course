@@ -61,6 +61,156 @@ Example:
 
 
 ## Ход работы
-1) **Language grammar with ANTLR**.
+### Language grammar with ANTLR.
 
-Грамматику для языка, поддерживающего графическое приложение, будем писать итеративно. Всю эволюцию написания грамматики можно проследить в директории `./grammar/`.
+Грамматику для языка, поддерживающего графическое приложение, будем писать итеративно. Всю эволюцию написания грамматики можно проследить в директории `./examples/` — с 1 по 12.6 тесты.
+
+В итоге, грамматика языка имеет такой вид:
+```bash
+program: funcList EOF;
+funcList: funcInit*;
+
+funcInit: 'func' NAME '(' argList? ')' '{' statements '}';
+argList: NAME (',' NAME)*;
+
+statements: statement*;
+statement: varInit | arrInit | assignment | ifStatement | whileStatement | ( call SEMI ) | returnStatement ;
+
+varInit: 'var' NAME '=' expr SEMI;
+arrInit: 'array' NAME '[' INT ']' '[' INT ']' SEMI; 
+assignment: (NAME | array) '=' expr SEMI;
+ifStatement: 'if' '(' expr ')' '{' statements '}' elseStatement?;
+elseStatement: 'else' '{' statements '}';
+whileStatement: 'while' '(' expr ')' '{' statements '}';
+call: NAME '(' callArgList? ')';
+callArgList: expr (',' expr)*;
+returnStatement: 'return' expr SEMI;
+
+array: NAME '[' expr ']' '[' expr ']';
+
+expr: 
+    '-' expr |
+    expr ( '==' | '!=' | '>' | '>=' | '<' | '<=' ) expr |
+    expr ( '*' | '/' | '%' ) expr |
+    expr ( '+' | '-' ) expr |
+    '(' expr ')' |
+    array |
+    INT |
+    NAME |
+    call;
+
+SEMI: ';';
+NAME: [a-zA-Z][a-zA-Z_0-9]*;
+INT: [0-9]+;
+WS: [ \t\r\n]+ -> skip;
+COMMENT: '//' ~[\r\n]* -> skip;
+```
+
+<br>
+
+### 2. Основные конструкции, которые поддерживаются в языке:
+  - Так как язык функциональный, можно создавать функции и вызывать их:
+
+    ```cpp
+    func foo() {
+      // some code
+    }
+
+    func app() {
+      foo();
+      return 0;
+    }
+    ```
+  - Поддерживаются базовые арифметические операции:
+    ```cpp
+    func foo() {
+      return 42;
+    }
+
+    func app() {
+      var a = 1;
+      var b = -x;
+      var c = a == b;
+      var d = a + b * c;
+      var e = (a + b) * c;
+
+      var f = e < foo() + 1;
+      var g = foo();
+
+      return 0;
+    }
+    ```
+
+  - Можно создавать переменные целочисленного типа. Присваивать переменным выражения. Возвращать переменные из функций:
+
+    ```cpp
+    func foo() {
+      var x = 42;
+      return x + 1;
+    }
+
+    func app() {
+      var a = 1;
+      var b = foo();
+      a = b;
+      return 0;
+    }
+    ```
+  - Поддерживаются двумерные массивы:
+
+    ```cpp
+    func app() {
+      array arr1[10][1337];
+      array arr2[1337][10];
+
+      var x = 42;
+      arr1[1][1] = x;
+      arr2[228][1] = arr1[1][1];
+
+      return 0;
+    }
+    ```
+  - Поддерживаются `if` и `if-else` выражения:
+    ```cpp
+    func foo() {
+      return 42;
+    }
+
+    func bar() {
+      return 52;
+    }
+
+    func app() {
+      var x = 5;
+      var y = 6;
+
+      var out = 0;
+      if(x == y) {
+        out = foo();
+      } else {
+        out = bar();
+      }
+
+      return 0;
+    }
+    ```
+  - Поддерживаются циклы `while`:
+    ```cpp
+    func foo() {
+      return 42;
+    }
+
+    func app() {
+      var x = 1;
+      var y = 10;
+
+      while(x < y) {
+        foo();
+        x = x + 1;
+      }
+
+      return 0;
+    }
+    ```
+
+
