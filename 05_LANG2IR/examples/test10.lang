@@ -1,3 +1,9 @@
+// Now we have `while`
+
+func foo() {
+  return 42;
+}
+
 func app() {
   var x = 1;
   var y = 10;
@@ -6,4 +12,6 @@ func app() {
     foo();
     x = x + 1;
   }
+
+  return 0;
 }

@@ -1,0 +1,24 @@
+// Now the language is functional. Each function has its own scope.
+// You can call only 3 declared, but not initialized functions:
+//      void simFlush(), 
+//      void simPutPixel(i32, i32, i32), 
+//      int simRand()
+
+func foo() {
+  return 42;
+}
+
+func bar() {
+  var x = 42;
+  simPutPixel(x, x, x);
+  var y = simRand();
+
+  return y;
+}
+
+func app() {
+  var g = foo();
+  bar();
+
+  return 0;
+}

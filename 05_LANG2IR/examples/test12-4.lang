@@ -1,0 +1,17 @@
+// Now we have better scopes inside and after `if`, `if-else` and `while`
+// In my language such test is an error:
+//      [Error] Variable `y` was not declared in this scope
+
+func app() {
+  var x = 1;
+
+  if (5) {
+    var z = x;
+  } else {
+    var y = x;
+  }
+
+  var w = x + y + z;
+
+  return 0;
+}

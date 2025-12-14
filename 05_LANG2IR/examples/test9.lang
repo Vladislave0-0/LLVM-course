@@ -1,0 +1,22 @@
+// Now we have `if` and `if-else` with bool-like expression
+
+func foo() {
+  return 42;
+}
+
+func bar() {
+  return 52;
+}
+
+func app() {
+  var x = 5;
+  var y = 6;
+
+  if(x == y) {
+    foo();
+  } else {
+    bar();
+  }
+
+  return 0;
+}

@@ -1,0 +1,7 @@
+// Now we have integral variables
+
+func app() {
+  var variable = 1;
+
+  return 0;
+}

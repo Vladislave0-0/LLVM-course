@@ -1,0 +1,26 @@
+// First working program with graphics.
+// The function `app` draws a red square
+
+func app() {
+  var start_x = 100;
+  var start_y = 100;
+  var outer_i = 0;
+  var color = -65536;
+  
+  while (outer_i < 100) {
+    var inner_i = 0;
+    
+    while (inner_i < 100) {
+      var pixel_x = start_x + inner_i;
+      var pixel_y = start_y + outer_i;
+      simPutPixel(pixel_x, pixel_y, color);
+      inner_i = inner_i + 1;
+    }
+    
+    outer_i = outer_i + 1;
+  }
+  
+  simFlush();
+  
+  return 0;
+}

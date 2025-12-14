@@ -1,4 +1,13 @@
-// Some comments about function app(a)
+// Now we have ability to write nested statements
+
+func foo() {
+  return 42;
+}
+
+func bar() {
+  return 52;
+}
+
 func app(a) {
   var x = 1;
   var y = 10;
@@ -13,4 +22,6 @@ func app(a) {
       bar();
     }
   }
+
+  return 0;
 }

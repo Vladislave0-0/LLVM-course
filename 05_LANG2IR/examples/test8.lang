@@ -1,13 +1,12 @@
+// Now we have expressions and two dimensional arrays.
+// You can see an error here that variable `x` was not
+// declared in this scope
+
 func foo() {
   return 42;
 }
 
-func bar() {
-  var x = 42;
-  printf(x);
-}
-
-func app(x, y, z) {
+func app() {
   var a = 1;
   var b = -x;
   var c = a == b;
@@ -19,5 +18,6 @@ func app(x, y, z) {
 
   var f = e < arr[1][1];
   var g = foo();
-  bar();
+
+  return 0;
 }

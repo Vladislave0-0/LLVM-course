@@ -1,0 +1,13 @@
+// Now we have better scopes inside and after `if`, `if-else` and `while`
+// In my language such test is an error:
+//      [ERROR] Redeclaration of `var x`
+
+func app() {
+  var x = 1;
+
+  if (5) {
+    var x = 2;
+  }
+
+  return 0;
+}

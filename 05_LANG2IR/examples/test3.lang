@@ -1,0 +1,5 @@
+// Error. App does not have terminator
+
+func app() {
+
+}

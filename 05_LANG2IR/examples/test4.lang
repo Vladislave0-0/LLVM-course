@@ -1,0 +1,5 @@
+// Now we have functions with integral arguments
+
+func app(x, y, z) {
+  return 0;
+}

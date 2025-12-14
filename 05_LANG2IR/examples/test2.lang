@@ -1,0 +1,7 @@
+// Error. You cannot write global variables
+
+var variable = 1;
+func app() {
+
+}
+
