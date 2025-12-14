@@ -33,7 +33,7 @@ expr:
     call;
 
 SEMI: ';';
-NAME: [a-zA-Z_]+;
+NAME: [a-zA-Z][a-zA-Z_0-9]*;
 INT: [0-9]+;
 WS: [ \t\r\n]+ -> skip;
 COMMENT: '//' ~[\r\n]* -> skip;
