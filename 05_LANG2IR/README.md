@@ -56,7 +56,7 @@ Example:
 
 **Запуск проекта**:
 ```bash
-./build/lang2ir ./test.txt
+./build/lang2ir ./test.lang
 ```
 
 
