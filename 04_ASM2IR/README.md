@@ -145,4 +145,5 @@ cmake --build build/
 
 На выходе вновь получаем игру "Жизнь".
 
+
 ![alt text](./images/image.png)
