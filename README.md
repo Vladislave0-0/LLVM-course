@@ -27,3 +27,7 @@
 5. **[Language to LLVM IR generator](/05_LANG2IR/)**
 
     Это реализация собственного $C$-подобного языка программирования. FrontEnd реализован с помощью `ANTLR`. После трансляции языка в `LLVM IR` вновь запускается игра "Жизнь".
+
+6. **[LLVM Backend](https://github.com/Vladislave0-0/llvm-project/tree/LLVM-course)**
+
+    Имплементация `LLVM Backend` для таргета *Russia*. Кликните по [ссылке](https://github.com/Vladislave0-0/llvm-project/tree/LLVM-course) для просмотра выполненного задания.
