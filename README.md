@@ -28,6 +28,10 @@
 
     Это реализация собственного $C$-подобного языка программирования. FrontEnd реализован с помощью `ANTLR`. После трансляции языка в `LLVM IR` вновь запускается игра "Жизнь".
 
-6. **[LLVM Backend](https://github.com/Vladislave0-0/llvm-project/tree/LLVM-course)**
+6. **[LLVM Backend — Target Registration [commit 1]](https://github.com/Vladislave0-0/llvm-project/tree/LLVM-course)**
 
-    Имплементация `LLVM Backend` для таргета *Russia*. Кликните по [ссылке](https://github.com/Vladislave0-0/llvm-project/tree/LLVM-course) для просмотра выполненного задания.
+    Имплементация `LLVM Backend`. Регистрация таргета *Russia*. Кликните по [ссылке](https://github.com/Vladislave0-0/llvm-project/tree/LLVM-course) для просмотра выполненного задания.
+
+7. **[LLVM Backend — Assembler Generation [commits 2-18]](https://github.com/Vladislave0-0/llvm-project/tree/LLVM-course)**
+
+    Имплементация `LLVM Backend`. Генерация простейшего ассемблерного файла. Кликните по [ссылке](https://github.com/Vladislave0-0/llvm-project/tree/LLVM-course) для просмотра выполненного задания.
