@@ -25,14 +25,10 @@ class IRGenerator final : public langBaseVisitor {
   Function *currFunc;
   Type *i32Ty;
 
-  // Function *printSimPutPixel();
-  // Function *printSimFlush();
-  // Function *printSimRand();
-
   const std::string_view appName = "app";
-  const std::string_view simPutPixelName = "simPutPixel";
-  const std::string_view simFlushName = "simFlush";
-  const std::string_view simRandName = "simRand";
+  const std::string_view simPutPixelName = "llvm.rus.simPutPixel";
+  const std::string_view simFlushName = "llvm.rus.simFlush";
+  const std::string_view simRandName = "llvm.rus.simRand";
 
 public:
   IRGenerator()
