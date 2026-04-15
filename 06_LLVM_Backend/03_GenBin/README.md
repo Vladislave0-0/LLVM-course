@@ -38,7 +38,7 @@ ninja -C build llvm-readobj
 ```
 File: test.o
 Format: elf32-rus
-Arch: unknown               // FIX
+Arch: rus
 AddressSize: 32bit
 LoadName: <Not found>  
 ```
