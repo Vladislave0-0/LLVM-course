@@ -31,14 +31,20 @@
 
 ### Задания второго семестра:
 
-6. **[LLVM Backend — Target Registration [commit 1]](https://github.com/Vladislave0-0/llvm-project/tree/LLVM-course)**
+6. **[LLVM Backend — Target Registration](/06_LLVM_Backend/01_RegTarget/)  [[commit 1]](https://github.com/Vladislave0-0/llvm-project/tree/LLVM-course)**
 
     Имплементация `LLVM Backend`. Регистрация таргета *Rus*. Кликните по [ссылке](https://github.com/Vladislave0-0/llvm-project/tree/LLVM-course) для просмотра выполненного задания.
 
-7. **[LLVM Backend — Assembler Generation [commits 2-18]](https://github.com/Vladislave0-0/llvm-project/tree/LLVM-course)**
+
+7. **[LLVM Backend — Assembler Generation](/06_LLVM_Backend/02_GenAsm/)  [[commits 2-18]](https://github.com/Vladislave0-0/llvm-project/tree/LLVM-course)**
+
 
     Имплементация `LLVM Backend`. Генерация простейшего ассемблерного файла для таргета *Rus*. Кликните по [ссылке](https://github.com/Vladislave0-0/llvm-project/tree/LLVM-course) для просмотра выполненного задания.
 
-8. **[LLVM Backend — Binary Generation [commits 19-22]](https://github.com/Vladislave0-0/llvm-project/tree/LLVM-course)**
+8. **[LLVM Backend — Binary Generation](/06_LLVM_Backend/03_GenBin/)  [[commits 19-22]](https://github.com/Vladislave0-0/llvm-project/tree/LLVM-course)**
+
+    Имплементация `LLVM Backend`. Генерация простейшего объектного файла для таргета *Rus*. Кликните по [ссылке](https://github.com/Vladislave0-0/llvm-project/tree/LLVM-course) для просмотра выполненного задания.
+
+9. **[LLVM Backend — Assembler Graphic Generation](/06_LLVM_Backend/04_GenGraphicAsm)  [[commits 19-22]](https://github.com/Vladislave0-0/llvm-project/tree/LLVM-course)**
 
     Имплементация `LLVM Backend`. Генерация простейшего объектного файла для таргета *Rus*. Кликните по [ссылке](https://github.com/Vladislave0-0/llvm-project/tree/LLVM-course) для просмотра выполненного задания.
