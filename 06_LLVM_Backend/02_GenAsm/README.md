@@ -10,7 +10,7 @@ define dso_local i32 @main() {
 
 Получение `test.s` из `test.ll`:
 ```
-.../llvm-project/build/bin/llc test.ll -march rus
+.../llvm-project/build/bin/llc test.ll -march rus --filetype=asm
 ```
 
 ---
