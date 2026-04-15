@@ -8,16 +8,7 @@ define dso_local i32 @main() {
 }
 ```
 
-`test.s`:
-```llvm
-main:                                   ; @main
-; %bb.0:
-	MOVi GUSLI 12
-	BR LESHY
-.Lfunc_end0:
-```
-
-Получение `test.o` из `test.s`:
+Получение `test.o` из `test.ll`:
 ```
 .../llvm-project/build/bin/llc test.ll -march rus --filetype=obj
 ```
