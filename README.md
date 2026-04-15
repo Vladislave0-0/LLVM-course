@@ -45,6 +45,11 @@
 
     Имплементация `LLVM Backend`. Генерация простейшего объектного файла для таргета *Rus*. Кликните по [ссылке](https://github.com/Vladislave0-0/llvm-project/tree/LLVM-course) для просмотра выполненного задания.
 
-9. **[LLVM Backend — Assembler Graphic Generation](/06_LLVM_Backend/04_GenGraphicAsm)  [[commits 19-22]](https://github.com/Vladislave0-0/llvm-project/tree/LLVM-course)**
+9. **[LLVM Backend — Assembler Graphic Generation](/06_LLVM_Backend/04_GenGraphicAsm)  [[commits 23-25]](https://github.com/Vladislave0-0/llvm-project/tree/LLVM-course)**
 
-    Имплементация `LLVM Backend`. Генерация простейшего объектного файла для таргета *Rus*. Кликните по [ссылке](https://github.com/Vladislave0-0/llvm-project/tree/LLVM-course) для просмотра выполненного задания.
+    Имплементация `LLVM Backend`. Добавлены:
+    - интринсики, аналогичные интерфейсу [графического приложения](/01_SDL/); 
+    - проброс использования этих интринсиков в `clang` через `ClangBuiltins`; 
+    - режим генерации этих интринсиков вместо вызова функций в [LANG2IR](/05_LANG2IR/include/).
+    
+    Кликните по [ссылке](https://github.com/Vladislave0-0/llvm-project/tree/LLVM-course) для просмотра выполненного задания.
