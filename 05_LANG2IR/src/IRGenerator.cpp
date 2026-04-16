@@ -9,9 +9,9 @@ namespace lang2ir {
 extern "C" {
 void simInit();
 void simExit();
-int simRand();
 void simPutPixel(int x, int y, int argb);
 void simFlush();
+int simRand();
 }
 
 void IRGenerator::execute() {
