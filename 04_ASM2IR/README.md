@@ -25,7 +25,7 @@
 |   8   |       **ANDi**       |           `ANDi dst, src, imm`          |     Побитовое "И" с константой     |                                     `%dst = and i32 %src, imm`                                     |
 |   9   |      **CMP_EQ**      |          `CMP_EQ dst, src, imm`         |       Сравнение на равенство       |                                   `%dst = icmp eq i32 %src, imm`                                   |
 |   10  |      **CMP_LT**      |          `CMP_LT dst, src, imm`         |         Сравнение "меньше"         |                                   `%dst = icmp slt i32 %src, imm`                                  |
-|   11  |      **CMP_GT**      |          `CMP_GT dst, src, imm`         |         Сравнение "больше"         |                                   `%dst = icmp sgt i32 %src, imm`                                  |
+|   11  |      **CMP_GE**      |          `CMP_GE dst, src, imm`         |         Сравнение "больше или равно"         |                                   `%dst = icmp sge i32 %src, imm`                                  |
 |   12  |      **INC_EQ**      |          `INC_EQ dst, src, imm`         | Инкремент и сравнение на равенство |                     `%temp = add i32 %src, 1`  `%dst = icmp eq i32 %temp, imm`                     |
 |   13  |      **BRANCH**      |              `BRANCH label`             |         Безусловный переход        |                                          `br label %label`                                         |
 |   14  |      **BR_COND**     | `BR_COND cond, label_true, label_false` |          Условный переход          |                              `br i1 %cond, label %true, label %false`                              |
