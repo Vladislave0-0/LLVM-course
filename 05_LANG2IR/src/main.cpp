@@ -1,3 +1,4 @@
+// #define __rus__
 #include "../generated/langLexer.h"
 #include <../include/IRGenerator.hpp>
 #include <CLI/CLI.hpp>
@@ -41,5 +42,5 @@ int main(int argc, char **argv) {
   }
 
   generator.printModule(IRFile);
-  generator.execute();
+  // generator.execute();
 }

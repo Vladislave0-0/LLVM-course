@@ -1,3 +1,4 @@
+// #define __rus__
 #include "../include/IRGenerator.hpp"
 #include <llvm-18/llvm/ExecutionEngine/ExecutionEngine.h>
 #include <llvm-18/llvm/ExecutionEngine/GenericValue.h>
@@ -27,9 +28,13 @@ void IRGenerator::execute() {
     return;
   }
 
+  const std::string simFlushName = resolveFuncName("simFlush");
+  const std::string simRandName = resolveFuncName("simRand");
+  const std::string simPutPixelName = resolveFuncName("simPutPixel");
+
+  execModule->getFunction(simPutPixelName);
   execModule->getFunction(simFlushName);
   execModule->getFunction(simRandName);
-  execModule->getFunction(simPutPixelName);
 
   LLVMInitializeNativeTarget();
   LLVMInitializeNativeAsmPrinter();
@@ -70,13 +75,13 @@ void IRGenerator::printAppFunctions() {
       llvm::FunctionType::get(voidTy, {i32Ty, i32Ty, i32Ty}, false);
 
   llvm::Function::Create(simPutPixelTy, llvm::GlobalValue::ExternalLinkage,
-                         simPutPixelName, *IRModule);
+                         resolveFuncName("simPutPixel"), *IRModule);
 
   llvm::Function::Create(simFlushTy, llvm::GlobalValue::ExternalLinkage,
-                         simFlushName, *IRModule);
+                         resolveFuncName("simFlush"), *IRModule);
 
   llvm::Function::Create(simRandTy, llvm::GlobalValue::ExternalLinkage,
-                         simRandName, *IRModule);
+                         resolveFuncName("simRand"), *IRModule);
 }
 
 antlrcpp::Any IRGenerator::visitProgram(langParser::ProgramContext *ctx) {
@@ -174,7 +179,8 @@ antlrcpp::Any IRGenerator::visitFuncInit(langParser::FuncInitContext *ctx) {
 }
 
 antlrcpp::Any IRGenerator::visitCall(langParser::CallContext *ctx) {
-  auto funcName = ctx->NAME()->getText();
+  auto rawFuncName = ctx->NAME()->getText();
+  std::string funcName = resolveFuncName(rawFuncName);
   Function *func = IRModule->getFunction(funcName);
 
   if (!func) {

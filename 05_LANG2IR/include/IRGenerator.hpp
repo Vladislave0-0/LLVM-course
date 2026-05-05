@@ -26,15 +26,16 @@ class IRGenerator final : public langBaseVisitor {
   Type *i32Ty;
 
   const std::string_view appName = "app";
+  const std::unordered_set<std::string_view> systemFuncs = {
+      "simRand", "simFlush", "simPutPixel"};
+
+  std::string resolveFuncName(std::string name) {
 #ifdef __rus__
-  const std::string_view simPutPixelName = "llvm.rus.simPutPixel";
-  const std::string_view simFlushName = "llvm.rus.simFlush";
-  const std::string_view simRandName = "llvm.rus.simRand";
-#else
-  const std::string_view simPutPixelName = "simPutPixel";
-  const std::string_view simFlushName = "simFlush";
-  const std::string_view simRandName = "simRand";
-#endif // __rus__
+    if (systemFuncs.count(name))
+      return "llvm.rus." + name;
+#endif
+    return name;
+  }
 
 public:
   IRGenerator()
