@@ -53,3 +53,10 @@
     - режим генерации этих интринсиков вместо вызова функций в [LANG2IR](/05_LANG2IR/include/).
     
     Кликните по [ссылке](https://github.com/Vladislave0-0/llvm-project/tree/LLVM-course) для просмотра выполненного задания.
+
+
+10. **[LLVM Backend — Full Assembler and Binary Graphic Generation](/06_LLVM_Backend/05_FullGenGraphic)  [[commits 26-41]](https://github.com/Vladislave0-0/llvm-project/tree/LLVM-course)**
+
+    Имплементация `LLVM Backend`. Добавлена полная поддержка графического приложения.
+
+    Кликните по [ссылке](https://github.com/Vladislave0-0/llvm-project/tree/LLVM-course) для просмотра выполненного задания.
