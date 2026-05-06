@@ -2,26 +2,34 @@
 #include "../generated/langLexer.h"
 #include <../include/IRGenerator.hpp>
 #include <CLI/CLI.hpp>
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <llvm/IR/Verifier.h>
 #include <string>
 
 using namespace lang2ir;
+namespace fs = std::filesystem;
 
 int main(int argc, char **argv) {
   CLI::App app{"Language to LLVM IR generator"};
 
   std::string langFile;
-  std::string outputFile = "app.ll";
+  std::string outputFile;
 
   app.add_option("lang_file", langFile, "Input LANG file")->required();
-  app.add_option("-o,--output", outputFile, "Output LLVM IR file");
+  auto outOption =
+      app.add_option("-o,--output", outputFile, "Output LLVM IR file");
 
   try {
     app.parse(argc, argv);
   } catch (const CLI::ParseError &e) {
     return app.exit(e);
+  }
+
+  if (outOption->count() == 0) {
+    fs::path inputPath(langFile);
+    outputFile = inputPath.replace_extension(".ll").string();
   }
 
   std::ifstream stream(langFile);
