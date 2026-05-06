@@ -48,10 +48,17 @@ MODE options (optional):
   --compile  : Only compile
   --all      : Generate parser and compile (default behavior)
 
+OPTIONS:
+  -o, --output  : Specify output LLVM IR file name 
+                   (default: <input_name>.ll)
+  --help, -h    : Show this help
+  --rus         : Enable Rus Target (defines __rus__)
+
 Example:
-  ./run.sh              # Generate parser for grammar/lang.g4 and compile
-  ./run.sh --parse      # Only generate parser for grammar/lang.g4
-  ./run.sh --compile    # Only compile (assume parser already generated)  
+  ./run.sh                    # Generate parser for grammar/lang.g4 and compile
+  ./run.sh --parse            # Only generate parser for grammar/lang.g4
+  ./run.sh --compile          # Only compile (assume parser already generated)
+  ./run.sh --compile --rus    # Only compile for Rus target (assume parser already generated)
 ```
 
 **Запуск проекта**:
