@@ -1,4 +1,3 @@
-// #define __rus__
 #include "../generated/langLexer.h"
 #include <../include/IRGenerator.hpp>
 #include <CLI/CLI.hpp>

@@ -3,8 +3,13 @@ project(lang2ir LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
+option(ENABLE_RUS_TARGET "Enable Rus Target with __rus__ define" OFF)
+if(ENABLE_RUS_TARGET)
+    add_definitions(-D__rus__)
+    message(STATUS "Rus Target is ENABLED")
+endif()
 
 find_program(LLVM_CONFIG llvm-config REQUIRED)
 

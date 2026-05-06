@@ -1,4 +1,3 @@
-// #define __rus__
 #include "../include/IRGenerator.hpp"
 #include <llvm-18/llvm/ExecutionEngine/ExecutionEngine.h>
 #include <llvm-18/llvm/ExecutionEngine/GenericValue.h>

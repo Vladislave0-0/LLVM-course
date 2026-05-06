@@ -9,6 +9,8 @@ show_help() {
     echo "  --parse    : Only generate parser"
     echo "  --compile  : Only compile"
     echo "  --all      : Generate parser and compile (default behavior)"
+    echo "  --rus      : Enable Rus Target (defines __rus__)"
+    echo "  --help, -h : Show this help"
     echo ""
     echo "Example:"
     echo "  $0              # Generate parser for grammar/lang.g4 and compile"
@@ -17,21 +19,19 @@ show_help() {
     exit 0
 }
 
-# Проверка аргументов
-if [ $# -gt 1 ] || [ "$1" == "--help" ] || [ "$1" == "-h" ]; then
-    show_help
-fi
-
 # Определение режима
 MODE="--all"
-if [ $# -eq 1 ]; then
-    MODE="$1"
-    # Проверка валидности режима
-    if [[ "$MODE" != "--parse" && "$MODE" != "--compile" && "$MODE" != "--all" ]]; then
-        echo "Error: Invalid mode '$MODE'"
-        show_help
-    fi
-fi
+USE_RUS="OFF"
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --parse)   MODE="parse"; shift ;;
+        --compile) MODE="compile"; shift ;;
+        --all)     MODE="all"; shift ;;
+        --rus)     USE_RUS="ON"; shift ;;
+        --help|-h) show_help ;;
+        *) echo "Unknown option: $1"; show_help ;;
+    esac
+done
 
 # Проверка существования файла грамматики (всегда используем lang.g4)
 GRAMMAR_PAHT="grammar/lang.g4"
@@ -42,7 +42,7 @@ if [ ! -f "${GRAMMAR_PAHT}" ]; then
 fi
 
 # Генерация парсера
-if [[ "$MODE" == "--parse" || "$MODE" == "--all" ]]; then
+if [[ "$MODE" == "parse" || "$MODE" == "all" ]]; then
     echo "Generating parser for grammar/${GRAMMAR_NAME}.g4..."
     rm -rf generated/*
 
@@ -54,20 +54,12 @@ if [[ "$MODE" == "--parse" || "$MODE" == "--all" ]]; then
 fi
 
 # Компиляция
-if [[ "$MODE" == "--compile" || "$MODE" == "--all" ]]; then
+if [[ "$MODE" == "compile" || "$MODE" == "all" ]]; then
     echo "Compiling with ANTLR 4.13.1..."
 
+    mkdir -p build
+    cmake -S . -B build -DENABLE_RUS_TARGET=${USE_RUS}
     cmake --build ./build
-    
-    # clang++                                         \
-    #   src/*.cpp src/*.c generated/*.cpp             \
-    #   -I /usr/local/include/antlr4-runtime          \
-    #   -I generated                                  \
-    #   -L /usr/local/lib                             \
-    #   -lantlr4-runtime                              \
-    #   $(llvm-config --cppflags --ldflags --libs)    \
-    #   -std=c++17                                    \
-    #   -o lang2ir
     
     echo ""
     echo "Compilation successful. Executable: ./build/lang2ir"
